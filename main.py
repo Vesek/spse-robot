@@ -1,11 +1,22 @@
 import cv2
 import numpy as np
 import math
+from picamera2 import Picamera2
 
-cam = cv2.VideoCapture(0)
+running_on_rpi = True
+
+if running_on_rpi: picam2 = Picamera2()
+else: cam = cv2.VideoCapture(0)
+
+if running_on_rpi:
+    config = picam2.create_preview_configuration({"format": 'RGB888', "size": (640, 480)})
+    picam2.configure(config)
+    picam2.start()
 
 while True:
-    check, frame = cam.read()
+    if running_on_rpi: frame = picam2.capture_array()
+    else: check, frame = cam.read()
+    print(frame.shape)
 
     framegray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
@@ -43,12 +54,12 @@ while True:
             pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
             print(theta-2)
             cv2.line(line_image, pt1, pt2, (0,0,255), 1, cv2.LINE_AA)
-
     cv2.imshow('video', line_image)
-
+    # cv2.imwrite("sus.png",line_image)
+    # break
     key = cv2.waitKey(1)
     if key == 27:
         break
 
-cam.release()
+if not running_on_rpi: cam.release()
 cv2.destroyAllWindows()
