@@ -5,8 +5,8 @@ class Camera:
         self.cam = cv2.VideoCapture(0)
 
     def capture(self):
-        check, frame = cam.read()
+        check, frame = self.cam.read()
         return frame
 
     def deinit(self):
-        del self.picam2
+        self.cam.release()
