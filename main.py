@@ -1,17 +1,45 @@
+import RPi.GPIO as GPIO
+import board # Not setting GPIO.setmode(GPIO.BCM) manually because this already does it
+import busio
+import adafruit_pca9685
 import cv2
 import numpy as np
 import math
 from picamera2 import Picamera2
 import time
 
+# Flags (maybe will add as arguments)
+running_on_rpi = True
 headless = False
 in_fb = True
-running_on_rpi = True
 perf_metrics = False
 
 if perf_metrics:
     framecounter = 0
     lastsecond = 0
+
+# Define pins for motor controls
+STBY = 13
+AIN1 = 6
+AIN2 = 5
+BIN1 = 19
+BIN2 = 26
+
+OUT_PINS = [STBY, AIN1, AIN2, BIN1, BIN2]
+
+# Init all the pins
+for pin in OUT_PINS:
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, GPIO.LOW)
+
+# Init the PCA9685 I2C PWM board
+i2c = busio.I2C(board.SCL, board.SDA)
+pca = adafruit_pca9685.PCA9685(i2c)
+# Set the frequency for it
+pca.frequency = 500
+# Set it to 0 for good measure
+pca.channels[0].duty_cycle = 0
+pca.channels[1].duty_cycle = 0
 
 if running_on_rpi: picam2 = Picamera2()
 else: cam = cv2.VideoCapture(0)
