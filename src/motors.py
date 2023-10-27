@@ -38,6 +38,14 @@ class Motors:
             GPIO.output(AIN1, GPIO.LOW)
             GPIO.output(BIN1, GPIO.LOW)
     
+    def deinit(self):
+        self.pca.channels[0].duty_cycle = 0
+        self.pca.channels[1].duty_cycle = 0
+        for pin in OUT_PINS:
+            GPIO.output(pin, GPIO.LOW)
+        self.pca.deinit()
+        GPIO.cleanup()
+
     @property
     def speed(self):
         return self._speed
