@@ -16,6 +16,7 @@ def print_help():
 
 def main(args):
     # Default flags
+    running_on_rpi = True
     headless = True
     in_fb = False
     perf_metrics = False
@@ -28,7 +29,7 @@ def main(args):
                 running_on_rpi = True
                 in_fb = True
                 enable_motors = True
-                with open('/sys/class/graphics/fb0/virtual_size') as f:
+                with open('/sys/class/graphics/fb0/virtual_size') as f: # Get framebuffer size
                     size = f.read()
                     fb_size = size[:-1].split(",")
                     fb_size = [int(side) for side in fb_size]
@@ -38,7 +39,7 @@ def main(args):
     except FileNotFoundError: # If the file doesn't exist automatically assume a PC and disable framebuffer output
         running_on_rpi = False
 
-    if args is not []:
+    if args is not []: # Check all args
         if "-h" in args:
             print_help()
             sys.exit()
@@ -53,6 +54,7 @@ def main(args):
 
     print(f"Running on a Raspberry Pi: {running_on_rpi}")
 
+    # Import and init platform specific packages
     if running_on_rpi:
         from src.picam import Camera
         if enable_motors:
@@ -62,11 +64,12 @@ def main(args):
     else:
         from src.webcam import Camera
 
+    # Init general packages
     camera = Camera()
     analyzer = Analyzer(perf_metrics)
 
     try:
-        while True:
+        while True: # Main loop
             frame = camera.capture()
 
             preprocessed_frame = analyzer.preprocessing(frame)
@@ -89,7 +92,7 @@ def main(args):
                 if enable_motors: motors.speed = speed
                 print(speed)
 
-            if not headless:
+            if not headless: # Display output
                 if in_fb:
                     frame32 = cv2.cvtColor(line_image, cv2.COLOR_BGR2BGRA)
                     fbframe = cv2.resize(frame32, fb_size)
@@ -103,6 +106,7 @@ def main(args):
             if perf_metrics: print(analyzer.framecounter,analyzer.times)
     except KeyboardInterrupt:
         pass
+    
     print("\nQuitting because of a keyboard interrupt\n")
     if running_on_rpi and enable_motors: motors.deinit()
     camera.deinit()
