@@ -1,11 +1,6 @@
-import RPi.GPIO as GPIO
-import board # Not setting GPIO.setmode(GPIO.BCM) manually because this already does it
-import busio
-import adafruit_pca9685
 import cv2
 import numpy as np
 import math
-from picamera2 import Picamera2
 import time
 
 # Flags (maybe will add as arguments)
@@ -14,47 +9,25 @@ headless = False
 in_fb = True
 perf_metrics = False
 
-if perf_metrics:
-    framecounter = 0
-    lastsecond = 0
-
-# Define pins for motor controls
-STBY = 13
-AIN1 = 6
-AIN2 = 5
-BIN1 = 19
-BIN2 = 26
-
-OUT_PINS = [STBY, AIN1, AIN2, BIN1, BIN2]
-
-# Init all the pins
-for pin in OUT_PINS:
-    GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
-
-# Init the PCA9685 I2C PWM board
-i2c = busio.I2C(board.SCL, board.SDA)
-pca = adafruit_pca9685.PCA9685(i2c)
-# Set the frequency for it
-pca.frequency = 500
-# Set it to 0 for good measure
-pca.channels[0].duty_cycle = 0
-pca.channels[1].duty_cycle = 0
-
-if running_on_rpi: picam2 = Picamera2()
-else: cam = cv2.VideoCapture(0)
-
 if running_on_rpi:
-    config = picam2.create_preview_configuration({"format": 'RGB888', "size": (640, 480)})
-    picam2.configure(config)
-    picam2.start()
+    from src.picam import Camera
+    from src.motors import Motors
+    motors = Motors()
+    motors.enable()
+else:
+    from src.webcam import Camera
+
+if perf_metrics: framecounter = 0
+
+camera = Camera()
 
 while True:
     if perf_metrics: frametime = time.time()
-    if running_on_rpi: frame = picam2.capture_array()
-    else: check, frame = cam.read()
-    # print(frame.shape)
+
+    frame = camera.capture()
+
     if perf_metrics:  gettime = time.time()
+    
     framegray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
     # ret,th = cv2.threshold(framegray,0,255,cv2.THRESH_OTSU)
