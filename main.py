@@ -106,7 +106,7 @@ def main(args):
             if perf_metrics: print(analyzer.framecounter,analyzer.times)
     except KeyboardInterrupt:
         pass
-    
+
     print("\nQuitting because of a keyboard interrupt\n")
     if running_on_rpi and enable_motors: motors.deinit()
     camera.deinit()
