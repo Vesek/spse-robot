@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import board # Not setting GPIO.setmode(GPIO.BCM) manually because this already does it
 import busio
 import adafruit_pca9685
+import sys
 import time
 
 STBY = 13
@@ -50,12 +51,9 @@ try:
         GPIO.output(AIN2, GPIO.LOW)
         GPIO.output(BIN2, GPIO.LOW)
         time.sleep(2)
-except Exception as e:
+except KeyboardInterrupt:
     pca.channels[0].duty_cycle = 0
     pca.channels[1].duty_cycle = 0
     pca.deinit()
     GPIO.cleanup()
-
-pca.reset()
-pca.deinit()
-GPIO.cleanup()
+    sys.exit(130)
