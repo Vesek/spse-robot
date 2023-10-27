@@ -97,11 +97,12 @@ def main(args):
             
             if perf_metrics: print(analyzer.framecounter,analyzer.times)
     except KeyboardInterrupt:
-        print("\nQuitting because of a keyboard interrupt\n")
-        if running_on_rpi and enable_motors: motors.deinit()
-        camera.deinit()
-        if not headless and not in_fb: cv2.destroyAllWindows()
-        sys.exit()
+        pass
+    print("\nQuitting because of a keyboard interrupt\n")
+    if running_on_rpi and enable_motors: motors.deinit()
+    camera.deinit()
+    if not headless and not in_fb: cv2.destroyAllWindows()
+    sys.exit()
 
 if __name__ == "__main__":
    main(sys.argv[1:])
