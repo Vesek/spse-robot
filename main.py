@@ -16,6 +16,7 @@ try:
             running_on_rpi = False
 except FileNotFoundError:
     running_on_rpi = False
+    in_fb = False
 
 print(f"Running on a Raspberry Pi: {running_on_rpi}")
 
