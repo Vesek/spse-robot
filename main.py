@@ -29,9 +29,18 @@ try:
 
         line_image = np.copy(frame)
 
-        theta_avg, line_image = analyzer.process_lines(lines, line_image)
+        if headless:
+            theta_avg, line_image = analyzer.process_lines(lines)
+        else:
+            theta_avg, line_image = analyzer.process_lines(lines, line_image)
+
         if theta_avg is not None:
-            print(theta_avg)
+            speed = [0xFFFF,0xFFFF]
+            if theta_avg < 0:
+                speed[0] = round(speed[0] * abs(theta_avg))
+            else:
+                speed[1] = round(speed[1] * abs(theta_avg))
+            print(speed)
 
         if not headless:
             if in_fb:
