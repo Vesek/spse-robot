@@ -28,6 +28,11 @@ def main(args):
                 running_on_rpi = True
                 in_fb = True
                 enable_motors = True
+                with open('/sys/class/graphics/fb0/virtual_size') as f:
+                    size = f.read()
+                    fb_size = size[:-1].split(",")
+                    fb_size = [int(side) for side in fb_size]
+                    fb_size = tuple(fb_size)
             else:
                 running_on_rpi = False
     except FileNotFoundError: # If the file doesn't exist automatically assume a PC and disable framebuffer output
@@ -87,7 +92,7 @@ def main(args):
             if not headless:
                 if in_fb:
                     frame32 = cv2.cvtColor(line_image, cv2.COLOR_BGR2BGRA)
-                    fbframe = cv2.resize(frame32, (1920,1080))
+                    fbframe = cv2.resize(frame32, fb_size)
                     with open('/dev/fb0', 'rb+') as buf:
                         buf.write(fbframe)
                 else:
