@@ -35,11 +35,12 @@ try:
             theta_avg, line_image = analyzer.process_lines(lines, line_image)
 
         if theta_avg is not None:
-            speed = [0xFFFF,0xFFFF]
+            speed = [0x3333,0x3333]
             if theta_avg < 0:
-                speed[0] = round(speed[0] * abs(theta_avg))
+                speed[0] = round(speed[0] * (1-abs(theta_avg)))
             else:
-                speed[1] = round(speed[1] * abs(theta_avg))
+                speed[1] = round(speed[1] * (1-abs(theta_avg)))
+            if running_on_rpi: motors.speed = speed
             print(speed)
 
         if not headless:
