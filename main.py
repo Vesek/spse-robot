@@ -3,10 +3,21 @@ import numpy as np
 from src.analyzer import Analyzer
 
 # Flags (maybe will add as arguments)
-running_on_rpi = True
 headless = False
 in_fb = True
 perf_metrics = False
+
+try:
+    with open('/sys/firmware/devicetree/base/model') as f:
+        model = f.read()
+        if "Raspberry" in model:
+            running_on_rpi = True
+        else:
+            running_on_rpi = False
+except FileNotFoundError:
+    running_on_rpi = False
+
+print(f"Running on a Raspberry Pi: {running_on_rpi}")
 
 if running_on_rpi:
     from src.picam import Camera
