@@ -7,9 +7,11 @@ import time
 headless = False
 in_fb = True
 running_on_rpi = True
+perf_metrics = False
 
-framecounter = 0
-lastsecond = 0
+if perf_metrics:
+    framecounter = 0
+    lastsecond = 0
 
 if running_on_rpi: picam2 = Picamera2()
 else: cam = cv2.VideoCapture(0)
@@ -20,11 +22,11 @@ if running_on_rpi:
     picam2.start()
 
 while True:
-    frametime = time.time()
+    if perf_metrics: frametime = time.time()
     if running_on_rpi: frame = picam2.capture_array()
     else: check, frame = cam.read()
     # print(frame.shape)
-    gettime = time.time()
+    if perf_metrics:  gettime = time.time()
     framegray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
     # ret,th = cv2.threshold(framegray,0,255,cv2.THRESH_OTSU)
@@ -32,7 +34,7 @@ while True:
     th = cv2.adaptiveThreshold(framegray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,33,4)
 
     inverted = cv2.bitwise_not(th)
-    graythreshold = time.time()
+    if perf_metrics:  graythreshold = time.time()
     kernel = np.ones((3,3),np.uint8)
     opening = cv2.morphologyEx(inverted, cv2.MORPH_OPEN, kernel)
 
@@ -44,10 +46,10 @@ while True:
     min_line_length = 50
     max_line_gap = 10
     line_image = np.copy(frame)
-    morphedge = time.time()
+    if perf_metrics: morphedge = time.time()
     lines = cv2.HoughLines(canny, rho, theta, threshold, None,
                             min_line_length, max_line_gap, -1, 1)
-    houghtime = time.time()
+    if perf_metrics: houghtime = time.time()
     render_lines = []
     theta_avg = None
     if lines is not None:
@@ -70,7 +72,7 @@ while True:
     if theta_avg is not None:
         theta_avg = theta_avg / len(render_lines)
         print(theta_avg)
-    framecounter += 1
+    if perf_metrics: framecounter += 1
     if not headless:
         if in_fb:
             frame32 = cv2.cvtColor(line_image, cv2.COLOR_BGR2BGRA)
@@ -81,7 +83,7 @@ while True:
             cv2.imshow('video', line_image)
             if cv2.waitKey(1) == 27:
                 break
-    print(f"Frame: {framecounter} Total Frametime: {time.time()-frametime} Gettime: {gettime-frametime} Graythreshold: {graythreshold-gettime} Morphedge: {morphedge-graythreshold} Houghtime: {houghtime-morphedge}")
+    if perf_metrics: print(f"Frame: {framecounter} Total Frametime: {time.time()-frametime} Gettime: {gettime-frametime} Graythreshold: {graythreshold-gettime} Morphedge: {morphedge-graythreshold} Houghtime: {houghtime-morphedge}")
     # cv2.imwrite("sus.png",line_image)
     # break
 
