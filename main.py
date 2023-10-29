@@ -76,11 +76,12 @@ def main(args):
     if running_on_rpi:
         import RPi.GPIO as GPIO
         from src.picam import Camera
-        GPIO.setup(INP, GPIO.IN)
         if enable_motors:
             from src.motors import Motors
             motors = Motors()
             motors.enable()
+            if do_tocka:
+                GPIO.setup(INP, GPIO.IN)
     else:
         from src.webcam import Camera
 
@@ -112,7 +113,7 @@ def main(args):
 
             if deviation is not None:
                 speed = [0x2222,0x2222]
-                coefficent = 0.6
+                coefficent = 1
                 output = (1-abs(deviation)*coefficent)
                 if deviation < 0:
                     speed[0] = round(speed[0] * output)
