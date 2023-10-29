@@ -18,6 +18,7 @@ def print_help():
     print("\t--nomotors\tForcibly disables motors")
     print("\t-m\t\tPrints frametimes after every frame")
     print("\t--hough\t\tSwitches processing from counting pixels in a column to Hough transform")
+    print("\t-pi\t\tIf graphics is enabled, forces rendering of the preprocessed image for debugging use")
 
 def main(args):
     # Default flags
@@ -28,6 +29,7 @@ def main(args):
     enable_motors = False
     use_hough = False
     do_tocka = False
+    show_preprocessed_image = False
 
     try:
         with open('/sys/firmware/devicetree/base/model') as f: # Check if running on an Raspberry Pi
@@ -67,6 +69,8 @@ def main(args):
             use_hough = True
         if "--tocka" in args:
             do_tocka = True
+        if "-pi" in args:
+            show_preprocessed_image = True
 
     # Import and init platform specific packages
     if running_on_rpi:
@@ -91,27 +95,26 @@ def main(args):
 
             frame = camera.capture()
 
-            preprocessed_frame = analyzer.preprocessing(frame)
-
             if use_hough:
+                preprocessed_frame = analyzer.preprocessing(frame)
+
                 lines = analyzer.detect_lines(preprocessed_frame)
 
                 line_image = np.copy(frame)
 
                 if headless:
-                    eccentricity, _ = analyzer.process_lines(lines)
+                    deviation, _ = analyzer.process_lines(lines)
                 else:
-                    eccentricity, out_image = analyzer.process_lines(lines, line_image)
+                    deviation, out_image = analyzer.process_lines(lines, line_image)
             else:
-                analyzer.count_columns(preprocessed_frame)
-                out_image = preprocessed_frame
-                eccentricity = None
+                preprocessed_frame = analyzer.preprocessing(frame,otsu=True,kernel_size=(5,5))
+                deviation, out_image = analyzer.find_centroid(preprocessed_frame,not headless)
 
-            if eccentricity is not None:
+            if deviation is not None:
                 speed = [0x2222,0x2222]
                 coefficent = 0.6
-                output = (1-abs(eccentricity)*coefficent)
-                if eccentricity < 0:
+                output = (1-abs(deviation)*coefficent)
+                if deviation < 0:
                     speed[0] = round(speed[0] * output)
                 else:
                     speed[1] = round(speed[1] * output)
@@ -120,6 +123,7 @@ def main(args):
 
             if not headless: # Display output
                 if in_fb:
+                    if show_preprocessed_image: out_image = preprocessed_frame
                     frame32 = cv2.cvtColor(out_image, cv2.COLOR_BGR2BGRA)
                     fbframe = cv2.resize(frame32, fb_size)
                     with open('/dev/fb0', 'rb+') as buf:
@@ -140,4 +144,4 @@ def main(args):
     sys.exit()
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])

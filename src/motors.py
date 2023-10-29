@@ -32,7 +32,7 @@ class Motors:
         self.pca.channels[0].duty_cycle = self._speed[0]
         self.pca.channels[1].duty_cycle = self._speed[1]
 
-    def enable(self,state=True):
+    def enable(self,state=True): # TODO make this a property
         if state:
             GPIO.output(AIN2, GPIO.HIGH)
             GPIO.output(BIN1, GPIO.HIGH)

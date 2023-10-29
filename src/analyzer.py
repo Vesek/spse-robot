@@ -30,10 +30,23 @@ class Analyzer:
 
         return opening
 
-    def count_columns(self,frame):
-        swap_frame = np.swapaxes(frame,0,1)
-        print(f"{frame.shape} to {swap_frame.shape}")
-    
+    def find_centroid(self,frame,render=False):
+        contours, hierarchies = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        deviation = 0
+        if contours is not None:
+            contour = max(contours, key = cv2.contourArea)
+            moments = cv2.moments(contour)
+            cx = int(moments['m10']/moments['m00'])
+            deviation = (cx-frame.shape[1]/2)/(frame.shape[1]/2)
+            out_image = None
+            if render:
+                out_image = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+                cv2.drawContours(out_image, [contour], -1, (255, 0, 0), 3)
+                cy = int(moments['m01']/moments['m00'])
+                cv2.circle(out_image, (cx, cy), 7, (0, 0, 255), -1)
+                cv2.putText(img=out_image, text=str(deviation), org=(20, 30), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
+        return deviation, out_image
+
     def detect_lines(self,frame):
         if self.save_times: begin_time = time.time() # Save the time at which edge detection started
         canny = cv2.Canny(frame, 1, 3)
