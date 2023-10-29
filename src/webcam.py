@@ -6,6 +6,7 @@ class Camera:
 
     def capture(self):
         check, frame = self.cam.read()
+        frame = cv2.resize(frame, (640,480))
         return frame
 
     def deinit(self):
