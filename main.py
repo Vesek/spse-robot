@@ -122,8 +122,8 @@ def main(args):
                 print(speed)
 
             if not headless: # Display output
+                if show_preprocessed_image: out_image = preprocessed_frame
                 if in_fb:
-                    if show_preprocessed_image: out_image = preprocessed_frame
                     frame32 = cv2.cvtColor(out_image, cv2.COLOR_BGR2BGRA)
                     fbframe = cv2.resize(frame32, fb_size)
                     with open('/dev/fb0', 'rb+') as buf:
