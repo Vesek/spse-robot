@@ -32,10 +32,10 @@ class Motors:
 
     def enable(self,state=True):
         if state:
-            GPIO.output(AIN1, GPIO.HIGH)
+            GPIO.output(AIN2, GPIO.HIGH)
             GPIO.output(BIN1, GPIO.HIGH)
         else:
-            GPIO.output(AIN1, GPIO.LOW)
+            GPIO.output(AIN2, GPIO.LOW)
             GPIO.output(BIN1, GPIO.LOW)
     
     def deinit(self):
