@@ -29,6 +29,10 @@ class Analyzer:
         if self.save_times: self.times['preprocessing_time'] = round(time.time()-begin_time,5) # Save how much time did preprocessing take
 
         return opening
+
+    def count_columns(self,frame):
+        swap_frame = np.swapaxes(frame,0,1)
+        print(f"{frame.shape} to {swap_frame.shape}")
     
     def detect_lines(self,frame):
         if self.save_times: begin_time = time.time() # Save the time at which edge detection started

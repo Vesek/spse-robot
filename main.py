@@ -13,6 +13,7 @@ def print_help():
     print("\t--nofb\t\tForcibly disables framebuffer output")
     print("\t--nomotors\tForcibly disables motors")
     print("\t-m\t\tPrints frametimes after every frame")
+    print("\t--hough\t\tSwitches processing from counting pixels in a column to Hough transform")
 
 def main(args):
     # Default flags
@@ -21,6 +22,7 @@ def main(args):
     in_fb = False
     perf_metrics = False
     enable_motors = False
+    use_hough = False
 
     try:
         with open('/sys/firmware/devicetree/base/model') as f: # Check if running on an Raspberry Pi
@@ -29,15 +31,20 @@ def main(args):
                 running_on_rpi = True
                 in_fb = True
                 enable_motors = True
-                with open('/sys/class/graphics/fb0/virtual_size') as f: # Get framebuffer size
-                    size = f.read()
-                    fb_size = size[:-1].split(",")
-                    fb_size = [int(side) for side in fb_size]
-                    fb_size = tuple(fb_size)
+                try:
+                    with open('/sys/class/graphics/fb0/virtual_size') as f: # Get framebuffer size
+                        size = f.read()
+                        fb_size = size[:-1].split(",")
+                        fb_size = [int(side) for side in fb_size]
+                        fb_size = tuple(fb_size)
+                except FileNotFoundError:
+                    in_fb = False
             else:
                 running_on_rpi = False
     except FileNotFoundError: # If the file doesn't exist automatically assume a PC and disable framebuffer output
         running_on_rpi = False
+
+    print(f"Running on a Raspberry Pi: {running_on_rpi}")
 
     if args is not []: # Check all args
         if "-h" in args:
@@ -51,8 +58,8 @@ def main(args):
             enable_motors = False
         if "-m" in args:
             perf_metrics = False
-
-    print(f"Running on a Raspberry Pi: {running_on_rpi}")
+        if "--hough" in args:
+            use_hough = True
 
     # Import and init platform specific packages
     if running_on_rpi:
@@ -74,20 +81,25 @@ def main(args):
 
             preprocessed_frame = analyzer.preprocessing(frame)
 
-            lines = analyzer.detect_lines(preprocessed_frame)
+            if use_hough:
+                lines = analyzer.detect_lines(preprocessed_frame)
 
-            line_image = np.copy(frame)
+                line_image = np.copy(frame)
 
-            if headless:
-                theta_avg, line_image = analyzer.process_lines(lines)
+                if headless:
+                    eccentricity, _ = analyzer.process_lines(lines)
+                else:
+                    eccentricity, out_image = analyzer.process_lines(lines, line_image)
             else:
-                theta_avg, line_image = analyzer.process_lines(lines, line_image)
+                analyzer.count_columns(preprocessed_frame)
+                out_image = preprocessed_frame
+                eccentricity = None
 
-            if theta_avg is not None:
+            if eccentricity is not None:
                 speed = [0x2222,0x2222]
                 coefficent = 0.6
-                output = (1-abs(theta_avg)*coefficent)
-                if theta_avg < 0:
+                output = (1-abs(eccentricity)*coefficent)
+                if eccentricity < 0:
                     speed[0] = round(speed[0] * output)
                 else:
                     speed[1] = round(speed[1] * output)
@@ -96,12 +108,12 @@ def main(args):
 
             if not headless: # Display output
                 if in_fb:
-                    frame32 = cv2.cvtColor(line_image, cv2.COLOR_BGR2BGRA)
+                    frame32 = cv2.cvtColor(out_image, cv2.COLOR_BGR2BGRA)
                     fbframe = cv2.resize(frame32, fb_size)
                     with open('/dev/fb0', 'rb+') as buf:
                         buf.write(fbframe)
                 else:
-                    cv2.imshow('video', line_image)
+                    cv2.imshow('video', out_image)
                     if cv2.waitKey(1) == 27:
                         break
             
