@@ -27,6 +27,7 @@ def main(args):
     perf_metrics = False
     enable_motors = False
     use_hough = False
+    do_tocka = False
 
     try:
         with open('/sys/firmware/devicetree/base/model') as f: # Check if running on an Raspberry Pi
@@ -64,6 +65,8 @@ def main(args):
             perf_metrics = False
         if "--hough" in args:
             use_hough = True
+        if "--tocka" in args:
+            do_tocka = True
 
     # Import and init platform specific packages
     if running_on_rpi:
@@ -83,7 +86,7 @@ def main(args):
 
     try:
         while True: # Main loop
-            if running_on_rpi and not GPIO.input(INP):
+            if running_on_rpi and enable_motors and do_tocka and not GPIO.input(INP):
                 motors.tocka()
 
             frame = camera.capture()

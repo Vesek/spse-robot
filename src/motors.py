@@ -57,7 +57,6 @@ class Motors:
         self.speed = [0x0000,0x0000]
         self.enable(False)
 
-
     @property
     def speed(self):
         return self._speed
