@@ -1,7 +1,11 @@
+import time
+
 import cv2
 import numpy as np
 from src.analyzer import Analyzer
 import sys
+
+INP = 69  # CHANGE!!!
 
 def print_help():
     print("Line following robot for SPŠE by Plajta <3")
@@ -63,7 +67,9 @@ def main(args):
 
     # Import and init platform specific packages
     if running_on_rpi:
+        import RPi.GPIO as GPIO
         from src.picam import Camera
+        GPIO.setup(INP, GPIO.IN)
         if enable_motors:
             from src.motors import Motors
             motors = Motors()
@@ -77,6 +83,9 @@ def main(args):
 
     try:
         while True: # Main loop
+            if running_on_rpi and not GPIO.input(INP):
+                motors.tocka()
+
             frame = camera.capture()
 
             preprocessed_frame = analyzer.preprocessing(frame)

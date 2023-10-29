@@ -1,3 +1,5 @@
+import time
+
 import RPi.GPIO as GPIO
 import board # Not setting GPIO.setmode(GPIO.BCM) manually because this already does it
 import busio
@@ -45,6 +47,16 @@ class Motors:
             GPIO.output(pin, GPIO.LOW)
         self.pca.deinit()
         GPIO.cleanup()
+
+    def tocka(self):
+        self.enable(False)
+        self.speed = [0x2222,0x2222]
+        GPIO.output(AIN2, GPIO.HIGH)
+        GPIO.output(BIN2, GPIO.HIGH)
+        time.sleep(2.4)
+        self.speed = [0x0000,0x0000]
+        self.enable(False)
+
 
     @property
     def speed(self):
