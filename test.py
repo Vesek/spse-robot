@@ -29,7 +29,7 @@ pca.channels[1].duty_cycle = 0
 
 input("Press enter to start motors...")
 
-power = 0x8888
+power = 0x2222
 
 try:
     pca.channels[0].duty_cycle = power
@@ -41,16 +41,16 @@ try:
         #     time.sleep(0.01)
         GPIO.output(AIN1, GPIO.HIGH)
         GPIO.output(BIN1, GPIO.HIGH)
-        time.sleep(2)
+        time.sleep(2.4)
         GPIO.output(AIN1, GPIO.LOW)
         GPIO.output(BIN1, GPIO.LOW)
-        time.sleep(2)
-        GPIO.output(AIN2, GPIO.HIGH)
-        GPIO.output(BIN2, GPIO.HIGH)
-        time.sleep(2)
-        GPIO.output(AIN2, GPIO.LOW)
-        GPIO.output(BIN2, GPIO.LOW)
-        time.sleep(2)
+        time.sleep(2.4)
+        # GPIO.output(AIN1, GPIO.HIGH)
+        # GPIO.output(BIN2, GPIO.HIGH)
+        # time.sleep(2)
+        # GPIO.output(AIN1, GPIO.LOW)
+        # GPIO.output(BIN2, GPIO.LOW)
+        # time.sleep(2)
 except KeyboardInterrupt:
     pca.channels[0].duty_cycle = 0
     pca.channels[1].duty_cycle = 0
