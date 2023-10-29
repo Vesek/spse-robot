@@ -39,8 +39,8 @@ class Analyzer:
         rho = 1
         theta = np.pi/180
         threshold = 60
-        min_line_length = 50
-        max_line_gap = 10
+        min_line_length = 30
+        max_line_gap = 20
         lines = cv2.HoughLines(canny, rho, theta, threshold, None,
                                 min_line_length, max_line_gap, -1, 1)
         if self.save_times: self.times['line_time'] = round(time.time()-begin_time,5) # Save how much time did line detection take
