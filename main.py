@@ -84,11 +84,13 @@ def main(args):
                 theta_avg, line_image = analyzer.process_lines(lines, line_image)
 
             if theta_avg is not None:
-                speed = [0x3333,0x3333]
+                speed = [0x2222,0x2222]
+                coefficent = 0.6
+                output = (1-abs(theta_avg)*coefficent)
                 if theta_avg < 0:
-                    speed[0] = round(speed[0] * (1-abs(theta_avg)))
+                    speed[0] = round(speed[0] * output)
                 else:
-                    speed[1] = round(speed[1] * (1-abs(theta_avg)))
+                    speed[1] = round(speed[1] * output)
                 if enable_motors: motors.speed = speed
                 print(speed)
 
