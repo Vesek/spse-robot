@@ -119,8 +119,9 @@ def main(args):
                 Kp = 1
                 Kd = 1
                 now_time = time.time()
-                P = (1-abs(deviation)*Kp)
-                D = ((deviation - last_E) / (now_time-last_time)) * Kd
+                E = 1-abs(deviation)
+                P = E*Kp
+                D = ((E - last_E) / (now_time-last_time)) * Kd
                 output = P + D
                 if deviation < 0:
                     speed[0] = round(speed[0] * output)
@@ -128,7 +129,7 @@ def main(args):
                     speed[1] = round(speed[1] * output)
                 if enable_motors: motors.speed = speed
                 last_time = now_time
-                last_E = deviation
+                last_E = E
                 print(speed)
 
             if not headless: # Display output
