@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from src.analyzer import Analyzer
 import sys
+import time
 
 INP = 69  # CHANGE!!!
 
@@ -88,6 +89,8 @@ def main(args):
     # Init general packages
     camera = Camera()
     analyzer = Analyzer(perf_metrics)
+    last_E = 0
+    last_time = time.time()
 
     try:
         while True: # Main loop
@@ -113,13 +116,19 @@ def main(args):
 
             if deviation is not None:
                 speed = [0x2222,0x2222]
-                coefficent = 1
-                output = (1-abs(deviation)*coefficent)
+                Kp = 1
+                Kd = 1
+                now_time = time.time()
+                P = (1-abs(deviation)*Kp)
+                D = ((deviation - last_E) / (now_time-last_time)) * Kd
+                output = P + D
                 if deviation < 0:
                     speed[0] = round(speed[0] * output)
                 else:
                     speed[1] = round(speed[1] * output)
                 if enable_motors: motors.speed = speed
+                last_time = now_time
+                last_E = deviation
                 print(speed)
 
             if not headless: # Display output
