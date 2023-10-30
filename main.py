@@ -6,7 +6,7 @@ from src.analyzer import Analyzer
 import sys
 import time
 
-INP = 69  # CHANGE!!!
+INP = 21  # CHANGE!!!
 
 def print_help():
     print("Line following robot for SPŠE by Plajta <3")
