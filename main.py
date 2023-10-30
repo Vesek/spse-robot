@@ -90,7 +90,9 @@ def main(args):
     camera = Camera()
     analyzer = Analyzer(perf_metrics)
     last_E = 0
+    start_time = time.time()
     last_time = time.time()
+    stop_time = None
 
     try:
         while True: # Main loop
@@ -112,7 +114,11 @@ def main(args):
                     deviation, out_image = analyzer.process_lines(lines, line_image)
             else:
                 preprocessed_frame = analyzer.preprocessing(frame,otsu=True,kernel_size=(5,5))
-                deviation, out_image, _ = analyzer.find_centroid(preprocessed_frame,not headless)
+                deviation, out_image, sf_detect = analyzer.find_centroid(preprocessed_frame,not headless)
+                if sf_detect and ((time.time() - start_time) > 10):
+                    stop_time = time.time()
+                if stop_time is not None and ((time.time() - stop_time) > 0.5):
+                    break
 
             if deviation is not None:
                 speed = [0x2222,0x2222]

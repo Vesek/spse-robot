@@ -44,7 +44,7 @@ class Analyzer:
             (x, y), (MA, ma), angle = cv2.fitEllipse(contour)
 
             # Filter contours based on orientation (close to 0 or close to 90 degrees)
-            if (85 < angle < 95) or (175 < angle < 185):
+            if ma < 800:
                 sf_detect = True
 
             if render:
