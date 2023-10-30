@@ -33,19 +33,30 @@ class Analyzer:
     def find_centroid(self,frame,render=False):
         contours, hierarchies = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         deviation = 0
+        sf_detect = False
         if contours is not None:
             contour = max(contours, key = cv2.contourArea)
             moments = cv2.moments(contour)
             cx = int(moments['m10']/moments['m00'])
             deviation = (cx-frame.shape[1]/2)/(frame.shape[1]/2)
             out_image = None
+            # Calculate the orientation of each contour segment
+            (x, y), (MA, ma), angle = cv2.fitEllipse(contour)
+
+            # Filter contours based on orientation (close to 0 or close to 90 degrees)
+            if (85 < angle < 95) or (175 < angle < 185):
+                sf_detect = True
+
             if render:
                 out_image = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
                 cv2.drawContours(out_image, [contour], -1, (255, 0, 0), 3)
                 cy = int(moments['m01']/moments['m00'])
                 cv2.circle(out_image, (cx, cy), 7, (0, 0, 255), -1)
                 cv2.putText(img=out_image, text=str(deviation), org=(20, 30), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
-        return deviation, out_image
+                cv2.putText(img=out_image, text=str(angle), org=(20, 60), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
+                cv2.putText(img=out_image, text=str(MA), org=(20,90), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
+                cv2.putText(img=out_image, text=str(ma), org=(20, 120), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
+        return deviation, out_image, sf_detect
 
     def detect_lines(self,frame):
         if self.save_times: begin_time = time.time() # Save the time at which edge detection started

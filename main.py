@@ -112,7 +112,7 @@ def main(args):
                     deviation, out_image = analyzer.process_lines(lines, line_image)
             else:
                 preprocessed_frame = analyzer.preprocessing(frame,otsu=True,kernel_size=(5,5))
-                deviation, out_image = analyzer.find_centroid(preprocessed_frame,not headless)
+                deviation, out_image, _ = analyzer.find_centroid(preprocessed_frame,not headless)
 
             if deviation is not None:
                 speed = [0x2222,0x2222]
