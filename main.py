@@ -142,8 +142,8 @@ def main(args):
 
 
             if deviation is not None:
-                speed = [0x2222,0x2222]
-                Kp = 1
+                speed = [0x7777,0x7777]
+                Kp = 1.3
                 Kd = 1
                 now_time = time.time()
                 E = 1-abs(deviation)
