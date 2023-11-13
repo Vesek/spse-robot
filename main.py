@@ -11,6 +11,7 @@ INP = 21  # CHANGE!!!
 def print_help():
     print("Line following robot for SPŠE by Plajta <3")
     print("Usage: main.py [arg1] [arg2] ...")
+    print("Or: main.py -i [arg1] [arg2] ... [input]")
     print("When no args are entered the script just starts with default settings")
     print("\nArgs:")
     print("\t-h\t\tPrint this help and exits")
@@ -20,6 +21,7 @@ def print_help():
     print("\t-m\t\tPrints frametimes after every frame")
     print("\t--hough\t\tSwitches processing from counting pixels in a column to Hough transform")
     print("\t-pi\t\tIf graphics is enabled, forces rendering of the preprocessed image for debugging use")
+    print("\t-i\t\tWhen this is enabled, the last argument willbe treated like a path to an input image")
 
 def main(args):
     # Default flags
@@ -31,6 +33,8 @@ def main(args):
     use_hough = False
     do_tocka = False
     show_preprocessed_image = False
+    virt_camera = False
+    path = ""
 
     try:
         with open('/sys/firmware/devicetree/base/model') as f: # Check if running on an Raspberry Pi
@@ -72,11 +76,15 @@ def main(args):
             do_tocka = True
         if "-pi" in args:
             show_preprocessed_image = True
+        if "-i" in args:
+            virt_camera = True
+
+    if virt_camera:
+        path = args[-1]
 
     # Import and init platform specific packages
     if running_on_rpi:
         import RPi.GPIO as GPIO
-        from src.picam import Camera
         if enable_motors:
             from src.motors import Motors
             motors = Motors()
@@ -86,8 +94,17 @@ def main(args):
     else:
         from src.webcam import Camera
 
+    # Camera import
+    if virt_camera:
+        from src.virtcam import Camera
+    else:
+        if running_on_rpi:
+            from src.picam import Camera
+        else:
+            from src.webcam import Camera
+
     # Init general packages
-    camera = Camera()
+    camera = Camera(path)
     analyzer = Analyzer(perf_metrics)
     last_E = 0
     start_time = time.time()

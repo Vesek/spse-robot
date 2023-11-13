@@ -2,7 +2,7 @@ from picamera2 import Picamera2
 import cv2
 
 class Camera:
-    def __init__(self):
+    def __init__(self,*args):
         self.picam2 = Picamera2()
         config = self.picam2.create_preview_configuration({"format": 'RGB888'})
         self.picam2.configure(config)
