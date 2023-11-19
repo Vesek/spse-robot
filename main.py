@@ -34,6 +34,7 @@ def main(args):
     do_tocka = False
     show_preprocessed_image = False
     virt_camera = False
+    stop_on_line = False
     path = ""
 
     try:
@@ -78,6 +79,8 @@ def main(args):
             show_preprocessed_image = True
         if "-i" in args:
             virt_camera = True
+        if "--stop" in args:
+            stop_on_line = True
 
     if virt_camera:
         path = args[-1]
@@ -131,11 +134,12 @@ def main(args):
                     deviation, out_image = analyzer.process_lines(lines, line_image)
             else:
                 preprocessed_frame = analyzer.preprocessing(frame,otsu=True,kernel_size=(5,5))
-                deviation, out_image, sf_detect = analyzer.find_centroid(preprocessed_frame,not headless)
+                deviation, out_image, sf_detect = analyzer.find_centroid(preprocessed_frame,not headless, stop_on_line)
                 if sf_detect and ((time.time() - start_time) > 10):
                     stop_time = time.time()
-                if stop_time is not None and ((time.time() - stop_time) > 0.5):
+                if sf_detect and stop_time is not None and ((time.time() - stop_time) > 0.5):
                     break
+
 
             if deviation is not None:
                 speed = [0x2222,0x2222]

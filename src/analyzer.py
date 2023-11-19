@@ -30,7 +30,7 @@ class Analyzer:
 
         return opening
 
-    def find_centroid(self,frame,render=False):
+    def find_centroid(self,frame,render=False,stop_on_line=False):
         contours, hierarchies = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         deviation = 0
         sf_detect = False
@@ -41,11 +41,11 @@ class Analyzer:
             deviation = (cx-frame.shape[1]/2)/(frame.shape[1]/2)
             out_image = None
             # Calculate the orientation of each contour segment
-            (x, y), (MA, ma), angle = cv2.fitEllipse(contour)
-
-            # Filter contours based on orientation (close to 0 or close to 90 degrees)
-            if ma < 800:
-                sf_detect = True
+            if stop_on_line:
+                (x, y), (MA, ma), angle = cv2.fitEllipse(contour)
+                # Filter contours based on orientation (close to 0 or close to 90 degrees)
+                if ma < 800:
+                    sf_detect = True
 
             if render:
                 out_image = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
@@ -53,9 +53,10 @@ class Analyzer:
                 cy = int(moments['m01']/moments['m00'])
                 cv2.circle(out_image, (cx, cy), 7, (0, 0, 255), -1)
                 cv2.putText(img=out_image, text=str(deviation), org=(20, 30), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
-                cv2.putText(img=out_image, text=str(angle), org=(20, 60), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
-                cv2.putText(img=out_image, text=str(MA), org=(20,90), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
-                cv2.putText(img=out_image, text=str(ma), org=(20, 120), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
+                if stop_on_line:
+                    cv2.putText(img=out_image, text=str(angle), org=(20, 60), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
+                    cv2.putText(img=out_image, text=str(MA), org=(20,90), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
+                    cv2.putText(img=out_image, text=str(ma), org=(20, 120), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
         return deviation, out_image, sf_detect
 
     def detect_lines(self,frame):
