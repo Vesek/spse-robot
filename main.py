@@ -22,6 +22,7 @@ def print_help():
     print("\t--hough\t\tSwitches processing from counting pixels in a column to Hough transform")
     print("\t-pi\t\tIf graphics is enabled, forces rendering of the preprocessed image for debugging use")
     print("\t-i\t\tWhen this is enabled, the last argument willbe treated like a path to an input image")
+    print("\t--stop\t\tWhen enabled the robot will try to stop on the finish line")
 
 def main(args):
     # Default flags
@@ -60,7 +61,7 @@ def main(args):
     print(f"Running on a Raspberry Pi: {running_on_rpi}")
 
     if args is not []: # Check all args
-        if "-h" in args:
+        if "-h" or "--help" in args:
             print_help()
             sys.exit()
         if "-g" in args:
