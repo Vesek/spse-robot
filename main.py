@@ -145,7 +145,7 @@ def main(args):
                 E = 1-abs(deviation)
                 P = E*Kp
                 D = ((E - last_E) / (now_time-last_time)) * Kd
-                output = P + D
+                output = max(min(P + D, 1), 0)
                 if deviation < 0:
                     speed[0] = round(speed[0] * output)
                 else:
