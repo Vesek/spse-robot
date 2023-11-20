@@ -8,6 +8,7 @@ import time
 
 INP = 21  # CHANGE!!!
 
+
 def print_help():
     print("Line following robot for SPŠE by Plajta <3")
     print("Usage: main.py [arg1] [arg2] ...")
@@ -15,7 +16,8 @@ def print_help():
     print("When no args are entered the script just starts with default settings")
     print("\nArgs:")
     print("\t-h\t\tPrint this help and exits")
-    print("\t-g\t\tStarts with a graphics output, if on a Raspberry Pi, automatically assumes that framebuffer should be used")
+    print(
+        "\t-g\t\tStarts with a graphics output, if on a Raspberry Pi, automatically assumes that framebuffer should be used")
     print("\t--nofb\t\tForcibly disables framebuffer output")
     print("\t--nomotors\tForcibly disables motors")
     print("\t-m\t\tPrints frametimes after every frame")
@@ -23,6 +25,7 @@ def print_help():
     print("\t-pi\t\tIf graphics is enabled, forces rendering of the preprocessed image for debugging use")
     print("\t-i\t\tWhen this is enabled, the last argument willbe treated like a path to an input image")
     print("\t--stop\t\tWhen enabled the robot will try to stop on the finish line")
+
 
 def main(args):
     # Default flags
@@ -40,14 +43,14 @@ def main(args):
     path = ""
 
     try:
-        with open('/sys/firmware/devicetree/base/model') as f: # Check if running on an Raspberry Pi
+        with open('/sys/firmware/devicetree/base/model') as f:  # Check if running on an Raspberry Pi
             model = f.read()
             if "Raspberry" in model:
                 running_on_rpi = True
                 in_fb = True
                 enable_motors = True
                 try:
-                    with open('/sys/class/graphics/fb0/virtual_size') as f: # Get framebuffer size
+                    with open('/sys/class/graphics/fb0/virtual_size') as f:  # Get framebuffer size
                         size = f.read()
                         fb_size = size[:-1].split(",")
                         fb_size = [int(side) for side in fb_size]
@@ -56,12 +59,12 @@ def main(args):
                     in_fb = False
             else:
                 running_on_rpi = False
-    except FileNotFoundError: # If the file doesn't exist automatically assume a PC and disable framebuffer output
+    except FileNotFoundError:  # If the file doesn't exist automatically assume a PC and disable framebuffer output
         running_on_rpi = False
 
     print(f"Running on a Raspberry Pi: {running_on_rpi}")
 
-    if args is not []: # Check all args
+    if args is not []:  # Check all args
         if "-h" in args:
             print_help()
             sys.exit()
@@ -117,7 +120,7 @@ def main(args):
     stop_time = None
 
     try:
-        while True: # Main loop
+        while True:  # Main loop
             if running_on_rpi and enable_motors and do_tocka and not GPIO.input(INP):
                 motors.tocka()
 
@@ -135,27 +138,28 @@ def main(args):
                 else:
                     deviation, out_image = analyzer.process_lines(lines, line_image)
             else:
-                preprocessed_frame, thresh = analyzer.preprocessing(frame,otsu=True,kernel_size=(5,5))
-                deviation, out_image, sf_detect = analyzer.find_centroid(preprocessed_frame,not headless, stop_on_line)
-                verdict, color = analyzer.find_colors(frame,otsu=True,thresh=thresh)
-                if sf_detect and ((time.time() - start_time) > 10):
-                    stop_time = time.time()
-                if sf_detect and stop_time is not None and ((time.time() - stop_time) > 0.5):
-                    break
-                out_image = color
+                preprocessed_frame, thresh = analyzer.preprocessing(frame, otsu=True, kernel_size=(5, 5))
+                deviation, out_image, contour = analyzer.find_centroid(preprocessed_frame, not headless)
+                verdict, color = analyzer.find_colors(frame, otsu=True, thresh=thresh)
+                if stop_on_line:
+                    sf_detect = analyzer.stop_line_detect(contour, (100, 200), (500, 200))
+                    if sf_detect and ((time.time() - start_time) > 10):
+                        stop_time = time.time()
+                    if stop_time is not None and ((time.time() - stop_time) > 0.5):
+                        break
+                # out_image = color
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
                 # cv2.addWeighted(color,0.5,out_image,0.5,0)
-
 
             if deviation is not None:
                 speed = [max_speed,max_speed]
                 Kp = 1.3
                 Kd = 1
                 now_time = time.time()
-                E = 1-abs(deviation)
-                P = E*Kp
-                D = ((E - last_E) / (now_time-last_time)) * Kd
+                E = 1 - abs(deviation)
+                P = E * Kp
+                D = ((E - last_E) / (now_time - last_time)) * Kd
                 output = max(min(P + D, 1), 0)
                 if deviation < 0:
                     speed[0] = round(speed[0] * output)
@@ -166,7 +170,7 @@ def main(args):
                 last_E = E
                 print(speed)
 
-            if not headless: # Display output
+            if not headless:  # Display output
                 if show_preprocessed_image: out_image = preprocessed_frame
                 if in_fb:
                     frame32 = cv2.cvtColor(out_image, cv2.COLOR_BGR2BGRA)
@@ -177,8 +181,8 @@ def main(args):
                     cv2.imshow('video', out_image)
                     if cv2.waitKey(1) == 27:
                         break
-            
-            if perf_metrics: print(analyzer.framecounter,analyzer.times)
+
+            if perf_metrics: print(analyzer.framecounter, analyzer.times)
     except KeyboardInterrupt:
         pass
 
@@ -187,6 +191,7 @@ def main(args):
     camera.deinit()
     if not headless and not in_fb: cv2.destroyAllWindows()
     sys.exit()
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

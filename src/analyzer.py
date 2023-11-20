@@ -75,22 +75,17 @@ class Analyzer:
 
         return opening, ret
 
-    def find_centroid(self,frame,render=False,stop_on_line=False):
+    def find_centroid(self,frame,render=False):
         contours, hierarchies = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         deviation = 0
         out_image = None
-        sf_detect = False
+        contour = None
         if contours is not None and contours != ():
             contour = max(contours, key = cv2.contourArea)
             moments = cv2.moments(contour)
             cx = int(moments['m10']/moments['m00'])
             deviation = (cx-frame.shape[1]/2)/(frame.shape[1]/2)
             # Calculate the orientation of each contour segment
-            if stop_on_line:
-                (x, y), (MA, ma), angle = cv2.fitEllipse(contour)
-                # Filter contours based on orientation (close to 0 or close to 90 degrees)
-                if ma < 800:
-                    sf_detect = True
 
             if render:
                 out_image = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
@@ -98,11 +93,14 @@ class Analyzer:
                 cy = int(moments['m01']/moments['m00'])
                 cv2.circle(out_image, (cx, cy), 7, (0, 0, 255), -1)
                 cv2.putText(img=out_image, text=str(deviation), org=(20, 30), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
-                if stop_on_line:
-                    cv2.putText(img=out_image, text=str(angle), org=(20, 60), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
-                    cv2.putText(img=out_image, text=str(MA), org=(20,90), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
-                    cv2.putText(img=out_image, text=str(ma), org=(20, 120), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255),thickness=2)
-        return deviation, out_image, sf_detect
+        return deviation, out_image, contour
+
+    def stop_line_detect(self, contour, point1, point2):
+        if contour is not None:
+            dst1 = cv2.pointPolygonTest(contour, point1, True)
+            dst2 = cv2.pointPolygonTest(contour, point2, True)
+            return (dst1 > 0) and (dst2 > 0)
+        return False
 
     def detect_lines(self,frame):
         if self.save_times: begin_time = time.time() # Save the time at which edge detection started
@@ -116,7 +114,7 @@ class Analyzer:
         min_line_length = 30
         max_line_gap = 20
         lines = cv2.HoughLines(canny, rho, theta, threshold, None,
-                                min_line_length, max_line_gap, -1, 1)
+                               min_line_length, max_line_gap, -1, 1)
         if self.save_times: self.times['line_time'] = round(time.time()-begin_time,5) # Save how much time did line detection take
 
         return lines
