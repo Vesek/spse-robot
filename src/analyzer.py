@@ -10,13 +10,16 @@ class Analyzer:
             self.framecounter = 0
             self.times = {}
 
-    def find_colors(self,frame,otsu=False):
+    def find_colors(self,frame,otsu=False,thresh=None): # If it's stupid and it works, it is not stupid.
         channels = [frame[:,:,0],frame[:,:,1],frame[:,:,2]]
         for i in range(len(channels)):
             if otsu: # Pick which thresholding to use based on arguments
                 blur = cv2.GaussianBlur(channels[i],(5,5),0)
-                ret,th = cv2.threshold(blur,0,255,cv2.THRESH_OTSU)
-                print(f"Channel: {i}, Ret: {ret}")
+                if thresh == None:
+                    ret,th = cv2.threshold(blur,0,255,cv2.THRESH_OTSU)
+                else:
+                    ret, th = cv2.threshold(blur,thresh,255,cv2.THRESH_BINARY)
+                # print(f"Channel: {i}, Ret: {ret}")
             else:
                 th = cv2.adaptiveThreshold(channels[i],255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,33,4)
             channels[i] = th
@@ -56,6 +59,8 @@ class Analyzer:
             self.framecounter += 1 # Add one to the framecounter, as we can safely assume that preprocessing is the first point where this class interacts with a frame
         framegray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY) # Convert frame to grayscale
 
+        ret = None
+
         if otsu: # Pick which thresholding to use based on arguments
             ret,th = cv2.threshold(framegray,0,255,cv2.THRESH_OTSU)
         else:
@@ -68,7 +73,7 @@ class Analyzer:
 
         if self.save_times: self.times['preprocessing_time'] = round(time.time()-begin_time,5) # Save how much time did preprocessing take
 
-        return opening
+        return opening, ret
 
     def find_centroid(self,frame,render=False,stop_on_line=False):
         contours, hierarchies = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)

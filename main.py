@@ -36,6 +36,7 @@ def main(args):
     show_preprocessed_image = False
     virt_camera = False
     stop_on_line = False
+    max_speed = 0x7777
     path = ""
 
     try:
@@ -134,9 +135,9 @@ def main(args):
                 else:
                     deviation, out_image = analyzer.process_lines(lines, line_image)
             else:
-                preprocessed_frame = analyzer.preprocessing(frame,otsu=True,kernel_size=(5,5))
+                preprocessed_frame, thresh = analyzer.preprocessing(frame,otsu=True,kernel_size=(5,5))
                 deviation, out_image, sf_detect = analyzer.find_centroid(preprocessed_frame,not headless, stop_on_line)
-                verdict, color = analyzer.find_colors(frame,otsu=True)
+                verdict, color = analyzer.find_colors(frame,otsu=True,thresh=thresh)
                 if sf_detect and ((time.time() - start_time) > 10):
                     stop_time = time.time()
                 if sf_detect and stop_time is not None and ((time.time() - stop_time) > 0.5):
@@ -148,7 +149,7 @@ def main(args):
 
 
             if deviation is not None:
-                speed = [0x7777,0x7777]
+                speed = [max_speed,max_speed]
                 Kp = 1.3
                 Kd = 1
                 now_time = time.time()
