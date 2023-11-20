@@ -16,6 +16,7 @@ class Analyzer:
             if otsu: # Pick which thresholding to use based on arguments
                 blur = cv2.GaussianBlur(channels[i],(5,5),0)
                 ret,th = cv2.threshold(blur,0,255,cv2.THRESH_OTSU)
+                print(f"Channel: {i}, Ret: {ret}")
             else:
                 th = cv2.adaptiveThreshold(channels[i],255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,33,4)
             channels[i] = th
@@ -28,24 +29,24 @@ class Analyzer:
         output = np.zeros(frame.shape,np.uint8)
         red[:,:] = 0
         green[:,:] = 0
+        verdict = 0
 
         if len(red_contours) != 0:
             red_contour = max(red_contours, key = cv2.contourArea)
             cv2.drawContours(red, [red_contour], -1, 255, 3)
+            if cv2.contourArea(red_contour) == 0:
+                pass # Verdict
             
         if len(green_contours) != 0:
             green_contour = max(green_contours, key = cv2.contourArea)
             cv2.drawContours(green, [green_contour], -1, 255, 3)
+            if cv2.contourArea(green_contour) == 0: 
+                pass # Verdict
         
         # for i in range(len(channels)):
         #     output[:,:,i] = channels[i]
         output[:,:,2] = red
         output[:,:,1] = green
-        verdict = 0
-        if red_contour[cv2.contourArea] == 0:
-            pass # Verdict
-        if green_contour[cv2.contourArea] == 0:
-            pass # Verdict
         return verdict,output
         
     
