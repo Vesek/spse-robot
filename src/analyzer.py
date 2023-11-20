@@ -9,6 +9,45 @@ class Analyzer:
         if self.save_times:
             self.framecounter = 0
             self.times = {}
+
+    def find_colors(self,frame,otsu=False):
+        channels = [frame[:,:,0],frame[:,:,1],frame[:,:,2]]
+        for i in range(len(channels)):
+            if otsu: # Pick which thresholding to use based on arguments
+                blur = cv2.GaussianBlur(channels[i],(5,5),0)
+                ret,th = cv2.threshold(blur,0,255,cv2.THRESH_OTSU)
+            else:
+                th = cv2.adaptiveThreshold(channels[i],255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,33,4)
+            channels[i] = th
+        # red = np.bitwise_and(channels[2],np.bitwise_not(channels[1]))
+        # green = np.bitwise_and(channels[1],np.bitwise_not(channels[2]))
+        red = np.bitwise_and(np.bitwise_and(channels[2],np.bitwise_not(channels[1])),np.bitwise_not(channels[0]))
+        green = np.bitwise_and(np.bitwise_and(channels[1],np.bitwise_not(channels[2])),np.bitwise_not(channels[0]))
+        red_contours, red_hierarchy = cv2.findContours(red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        green_contours, green_hierarchy = cv2.findContours(green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        output = np.zeros(frame.shape,np.uint8)
+        red[:,:] = 0
+        green[:,:] = 0
+
+        if len(red_contours) != 0:
+            red_contour = max(red_contours, key = cv2.contourArea)
+            cv2.drawContours(red, [red_contour], -1, 255, 3)
+            
+        if len(green_contours) != 0:
+            green_contour = max(green_contours, key = cv2.contourArea)
+            cv2.drawContours(green, [green_contour], -1, 255, 3)
+        
+        # for i in range(len(channels)):
+        #     output[:,:,i] = channels[i]
+        output[:,:,2] = red
+        output[:,:,1] = green
+        verdict = 0
+        if red_contour[cv2.contourArea] == 0:
+            pass # Verdict
+        if green_contour[cv2.contourArea] == 0:
+            pass # Verdict
+        return verdict,output
+        
     
     def preprocessing(self,frame,otsu=False,kernel_size=(3,3)):
         if self.save_times:
@@ -33,13 +72,13 @@ class Analyzer:
     def find_centroid(self,frame,render=False,stop_on_line=False):
         contours, hierarchies = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         deviation = 0
+        out_image = None
         sf_detect = False
-        if contours is not None:
+        if contours is not None and contours != ():
             contour = max(contours, key = cv2.contourArea)
             moments = cv2.moments(contour)
             cx = int(moments['m10']/moments['m00'])
             deviation = (cx-frame.shape[1]/2)/(frame.shape[1]/2)
-            out_image = None
             # Calculate the orientation of each contour segment
             if stop_on_line:
                 (x, y), (MA, ma), angle = cv2.fitEllipse(contour)
