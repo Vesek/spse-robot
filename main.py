@@ -140,14 +140,14 @@ def main(args):
             else:
                 preprocessed_frame, thresh = analyzer.preprocessing(frame, otsu=True, kernel_size=(5, 5))
                 deviation, out_image, contour = analyzer.find_centroid(preprocessed_frame, not headless)
-                verdict, color = analyzer.find_colors(frame, otsu=True, thresh=thresh)
+                verdict, color = analyzer.find_colors(frame, render=not headless, otsu=True, centroid=deviation, thresh=thresh)
                 if stop_on_line:
                     sf_detect = analyzer.stop_line_detect(contour, (100, 200), (500, 200))
                     if sf_detect and ((time.time() - start_time) > 10):
                         stop_time = time.time()
                     if stop_time is not None and ((time.time() - stop_time) > 0.5):
                         break
-                # out_image = color
+                out_image = color
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
                 # cv2.addWeighted(color,0.5,out_image,0.5,0)
