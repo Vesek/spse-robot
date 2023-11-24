@@ -62,7 +62,7 @@ class Analyzer:
             else:
                 output[:,:,2] = red
                 output[:,:,1] = green
-        print(verdict)
+        # print(verdict)
         return verdict,output
         
     
