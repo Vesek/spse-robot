@@ -1,17 +1,17 @@
 [Unit]
 # Human readable name of the unit
-Description=SPSE-Robot service
+Description=SPSE-Robot button service
 
 [Service]
 # Command to execute when the service is started
-ExecStart=/bin/bash /home/pi/spse-robot/systemd-trigger.sh
+ExecStart=/usr/bin/python /home/pi/spse-robot/daemon.py
 # Disable Python's buffering of STDOUT and STDERR, so that output from the
 # service shows up immediately in systemd's logs
 Environment=PYTHONUNBUFFERED=1
 # Automatically restart the service if it crashes
-Restart=no
+Restart=on-failure
 # Our service will notify systemd once it is up and running
-Type=simple
+Type=notify
 
 [Install]
 # Tell systemd to automatically start this service when the system boots
