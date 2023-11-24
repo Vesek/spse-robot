@@ -7,10 +7,10 @@ import adafruit_pca9685
 
 # Define pins for motor controls
 STBY = 13
-AIN1 = 6
-AIN2 = 5
-BIN1 = 19
-BIN2 = 26
+AIN1 = 5
+AIN2 = 6
+BIN1 = 26
+BIN2 = 19
 
 OUT_PINS = [STBY, AIN1, AIN2, BIN1, BIN2]
 

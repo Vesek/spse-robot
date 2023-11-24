@@ -11,10 +11,11 @@ if __name__ == '__main__':
         if os.system("systemctl --user is-active --quiet spse-robot") != 0:
             print("Starting spse-robot")
             os.system("systemctl --user start spse-robot")
+            # time.sleep(2)
         else:
             print("Stopping spse-robot")
             os.system("systemctl --user stop spse-robot")
-        # os.system("")
+            # time.sleep(2)
     GPIO.add_event_detect(21, GPIO.FALLING, callback=onButton, bouncetime=1000)
     systemd.daemon.notify('READY=1')
     while True:

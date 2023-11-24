@@ -5,6 +5,7 @@ Description=SPSE-Robot service
 [Service]
 # Command to execute when the service is started
 ExecStart=/bin/bash /home/pi/spse-robot/systemd-trigger.sh
+KillSignal=SIGINT
 # Disable Python's buffering of STDOUT and STDERR, so that output from the
 # service shows up immediately in systemd's logs
 Environment=PYTHONUNBUFFERED=1
