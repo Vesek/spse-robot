@@ -12,7 +12,7 @@ class Analyzer:
 
     def find_colors(self,frame,render=False,otsu=False,centroid=None,thresh=None): # If it's stupid and it works, it is not stupid.
         if centroid is not None: # Cuts off the left part of the line because there will never be a color dot there (at least in our case)
-            cut = int((centroid+1)*320)
+            cut = int((centroid+1)*(frame.shape[1]/2))
             channels = [frame[:,cut:,0],frame[:,cut:,1],frame[:,cut:,2]]
         else:
             channels = [frame[:,:,0],frame[:,:,1],frame[:,:,2]]
