@@ -4,12 +4,14 @@ import cv2
 class Camera:
     def __init__(self,*args):
         self.picam2 = Picamera2()
-        config = self.picam2.create_preview_configuration({"format": 'RGB888'})
+        config = self.picam2.create_preview_configuration(raw=self.picam2.sensor_modes[5])
         self.picam2.configure(config)
         self.picam2.start()
 
     def capture(self):
-        return self.picam2.capture_array()
+        array = self.picam2.capture_array()
+        print(array.shape)
+        return array
 
     def deinit(self):
         del self.picam2
