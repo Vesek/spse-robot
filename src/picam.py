@@ -10,7 +10,7 @@ class Camera:
 
     def capture(self):
         array = self.picam2.capture_array()
-        print(array.shape)
+        array = cv2.rotate(array, cv2.ROTATE_90_COUNTERCLOCKWISE)
         return array
 
     def deinit(self):
