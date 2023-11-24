@@ -3,6 +3,6 @@ import cv2
 
 cam = Camera()
 
-cv2.imwrite("13.png", cam.capture())
+cv2.imwrite("test.png", cam.capture())
 
 cam.deinit()
