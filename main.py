@@ -124,7 +124,7 @@ def main(args):
     stop_time = None
     if detect_colors:
         verdict_o_meter = [0,0,0] # Color, Number of frames with color, Number of frames from last color
-        min_color_frames = 5
+        min_color_frames = 3
         max_noncolor_frames = 2
 
 
