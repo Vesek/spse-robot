@@ -30,8 +30,8 @@ class Analyzer:
             channels[i] = opening
         # red = np.bitwise_and(channels[2],np.bitwise_not(channels[1]))
         # green = np.bitwise_and(channels[1],np.bitwise_not(channels[2]))
-        red = np.bitwise_and(np.bitwise_and(channels[2],np.bitwise_not(channels[1])),np.bitwise_not(channels[0])) # Remove white and off color things from our filtered images
-        green = np.bitwise_and(np.bitwise_and(channels[1],np.bitwise_not(channels[2])),np.bitwise_not(channels[0]))
+        red = np.bitwise_and(np.bitwise_and(channels[0],np.bitwise_not(channels[1])),np.bitwise_not(channels[2])) # Remove white and off color things from our filtered images
+        green = np.bitwise_and(np.bitwise_and(channels[1],np.bitwise_not(channels[0])),np.bitwise_not(channels[2]))
         red_contours, red_hierarchy = cv2.findContours(red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # This is just straight up stupid but i want to go to sleep earlier than yesterday
         green_contours, green_hierarchy = cv2.findContours(green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if render:

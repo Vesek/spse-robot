@@ -151,12 +151,13 @@ def main(args):
                 deviation, out_image, contour = analyzer.find_centroid(preprocessed_frame, not headless)
                 if detect_colors: verdict, color = analyzer.find_colors(frame, render=not headless, otsu=True, centroid=deviation, thresh=thresh)
                 if stop_on_line:
-                    sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0]*0.15), int(frame.shape[1]*0.42)), (int(frame.shape[0]*0.85), int(frame.shape[1]*0.42))) # Completely ✨ arbitrary ✨ numbers 
+                    sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0]*0.15), int(frame.shape[1]*0.42)), (int(frame.shape[0]*0.85), int(frame.shape[1]*0.42))) # Completely ✨ arbitrary ✨ numbers
                     if sf_detect and ((time.time() - start_time) > 10):
                         stop_time = time.time()
                     if stop_time is not None and ((time.time() - stop_time) > 0.5):
                         break
-                if not headless and detect_colors: out_image = (color + out_image)[:,:,:3]
+                # if not headless and detect_colors: out_image = (color[:,:,:3] + out_image)[:,:,:3]
+                out_image = color
                 if detect_colors:
                     if verdict[0] != 0:
                         if verdict_o_meter[0] == verdict[0]:
