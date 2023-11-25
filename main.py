@@ -123,7 +123,7 @@ def main(args):
     last_time = time.time()
     stop_time = None
     if detect_colors:
-        verdict_o_meter = ["None",0,0] # Color, Number of frames with color, Number of frames from last color
+        verdict_o_meter = [0,0,0] # Color, Number of frames with color, Number of frames from last color
         min_color_frames = 5
         max_noncolor_frames = 2
 
@@ -161,17 +161,17 @@ def main(args):
                     if verdict[0] != "None":
                         if verdict_o_meter[0] == verdict[0]:
                             verdict_o_meter[1] +=1
-                        elif verdict_o_meter[0] == "None":
+                        elif verdict_o_meter[0] == 0:
                             verdict_o_meter = [verdict[0],1,0]
                     if verdict_o_meter[0] != verdict[0]:
                         verdict_o_meter[2] += 1
-                    if verdict_o_meter[0] != "None" and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
-                        if verdict_o_meter[0] == "Red":
+                    if verdict_o_meter[0] != 0 and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
+                        if verdict_o_meter[0] == 1:
                             max_speed = 0x5555
-                            verdict_o_meter["None",0,0]
-                        if verdict_o_meter[0] == "Green":
+                            verdict_o_meter[0,0,0]
+                        if verdict_o_meter[0] == 2:
                             max_speed = 0x7777
-                            verdict_o_meter["None",0,0]
+                            verdict_o_meter[0,0,0]
                     print(verdict,verdict_o_meter)
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
