@@ -172,6 +172,8 @@ def main(args):
                         if verdict_o_meter[0] == 2:
                             max_speed = 0x7777
                             verdict_o_meter = [0,0,0]
+                    if verdict_o_meter[0] != 0 and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
+                        verdict_o_meter = [0,0,0]
                     print(verdict,verdict_o_meter)
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
