@@ -112,7 +112,7 @@ class Analyzer:
         if contour is not None: # It just checks if those two pixels are in the line, simple but effective
             dst1 = cv2.pointPolygonTest(contour, point1, True)
             dst2 = cv2.pointPolygonTest(contour, point2, True)
-            return (dst1 > 0) and (dst2 > 0)
+            return (dst1 > -2) and (dst2 > -2)
         return False
 
     def detect_lines(self,frame): # Wasn't used in the final deployment, don't use unless you really hate yourself
