@@ -25,6 +25,7 @@ def print_help():
     print("\t-pi\t\tIf graphics is enabled, forces rendering of the preprocessed image for debugging use")
     print("\t-i\t\tWhen this is enabled, the last argument willbe treated like a path to an input image")
     print("\t--stop\t\tWhen enabled the robot will try to stop on the finish line")
+    print("\t--colors\t\tWhen enabled the robot will try to react to colored markings")
 
 
 def main(args):
@@ -39,6 +40,7 @@ def main(args):
     show_preprocessed_image = False
     virt_camera = False
     stop_on_line = False
+    detect_colors = False
     max_speed = 0x7777
     path = ""
 
@@ -86,6 +88,8 @@ def main(args):
             virt_camera = True
         if "--stop" in args:
             stop_on_line = True
+        if "--colors" in args:
+            detect_colors = True
 
     if virt_camera:
         path = args[-1]
@@ -118,6 +122,11 @@ def main(args):
     start_time = time.time()
     last_time = time.time()
     stop_time = None
+    if detect_colors:
+        verdict_o_meter = ["None",0,0] # Color, Number of frames with color, Number of frames from last color
+        min_color_frames = 5
+        max_noncolor_frames = 2
+
 
     try:
         while True:  # Main loop
@@ -140,15 +149,30 @@ def main(args):
             else:
                 preprocessed_frame, thresh = analyzer.preprocessing(frame, otsu=True, kernel_size=(5, 5))
                 deviation, out_image, contour = analyzer.find_centroid(preprocessed_frame, not headless)
-                verdict, color = analyzer.find_colors(frame, render=not headless, otsu=True, centroid=deviation, thresh=thresh)
+                if detect_colors: verdict, color = analyzer.find_colors(frame, render=not headless, otsu=True, centroid=deviation, thresh=thresh)
                 if stop_on_line:
                     sf_detect = analyzer.stop_line_detect(contour, (100, 200), (500, 200))
                     if sf_detect and ((time.time() - start_time) > 10):
                         stop_time = time.time()
                     if stop_time is not None and ((time.time() - stop_time) > 0.5):
                         break
-                if not headless:
-                    out_image = (color + out_image)[:,:,:3]
+                if not headless and detect_colors: out_image = (color + out_image)[:,:,:3]
+                if detect_colors:
+                    if verdict[0] != "None":
+                        if verdict_o_meter[0] == verdict[0]:
+                            verdict_o_meter[1] +=1
+                        elif verdict_o_meter[0] == "None":
+                            verdict_o_meter = [verdict[0],1]
+                    if verdict_o_meter[0] != verdict[0]:
+                        verdict_o_meter[2] += 1
+                    if verdict_o_meter[0] != "None" and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
+                        if verdict_o_meter[0] == "Red":
+                            max_speed = 0x5555
+                            verdict_o_meter["None",0,0]
+                        if verdict_o_meter[0] == "Green":
+                            max_speed = 0x7777
+                            verdict_o_meter["None",0,0]
+                    print(verdict,verdict_o_meter)
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
                 # cv2.addWeighted(color,0.5,out_image,0.5,0)
