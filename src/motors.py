@@ -18,6 +18,7 @@ class Motors:
 
     def __init__(self):
         self._speed = [0,0]
+        self._angle = 0
         # Init all the pins
         for pin in OUT_PINS:
             GPIO.setup(pin, GPIO.OUT)
@@ -28,6 +29,9 @@ class Motors:
         self.pca = adafruit_pca9685.PCA9685(i2c)
         # Set the frequency for it
         self.pca.frequency = 500
+        self.servo_range = 1000
+        self.servo_step = self.servo_range / float(180)
+        self.period = (1000000 / self.pca.frequency)
         # Set it to 0 for good measure
         self.pca.channels[0].duty_cycle = self._speed[0]
         self.pca.channels[1].duty_cycle = self._speed[1]
@@ -61,8 +65,23 @@ class Motors:
     def speed(self):
         return self._speed
 
+    @property
+    def angle(self):
+        return self._angle
+
     @speed.setter
     def speed(self, newSpeed):
         self._speed = newSpeed
         self.pca.channels[0].duty_cycle = self._speed[0]
         self.pca.channels[1].duty_cycle = self._speed[1]
+
+    @angle.setter
+    def angle(self, newAngle):
+        self._angle = newAngle
+        if (self._angle < 0):
+            self._angle = 0
+        elif (self._angle > 180):
+            self._angle = 180
+        pulseWidth = self._angle * self.servo_step + 1000 # Angle * Degree represented in microseconds + Pulse for 0 degrees
+        duty = int((pulseWidth * 100) / float(self.period) * 0xFFFF)
+        self.pca.channels[2].duty_cycle = duty
