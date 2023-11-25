@@ -193,7 +193,7 @@ def main(args):
                 if enable_motors: motors.speed = speed
                 last_time = now_time
                 last_E = E
-                print(speed)
+                # print(speed)
 
             if not headless:  # Display output
                 if show_preprocessed_image: out_image = preprocessed_frame
