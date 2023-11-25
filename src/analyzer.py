@@ -37,7 +37,7 @@ class Analyzer:
         if render:
             red[:,:] = 0
             green[:,:] = 0
-        verdict = 0
+        verdict = [0,0]
 
         if len(red_contours) != 0:
             red_contour = max(red_contours, key = cv2.contourArea)
