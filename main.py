@@ -162,7 +162,7 @@ def main(args):
                         if verdict_o_meter[0] == verdict[0]:
                             verdict_o_meter[1] +=1
                         elif verdict_o_meter[0] == "None":
-                            verdict_o_meter = [verdict[0],1]
+                            verdict_o_meter = [verdict[0],1,0]
                     if verdict_o_meter[0] != verdict[0]:
                         verdict_o_meter[2] += 1
                     if verdict_o_meter[0] != "None" and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
