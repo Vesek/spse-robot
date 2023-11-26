@@ -1,5 +1,4 @@
 import time
-
 import cv2
 import numpy as np
 from src.analyzer import Analyzer
@@ -44,8 +43,8 @@ def main(args):
     start_speed = 0x9999
     int_speed = 0x0000
     acceleration = start_speed * 2 # Reach full speed in half a second
-    radial_speed_servo = 20 # In degrees per second
-    max_angle = 30
+    radial_speed_servo = 90 # In degrees per second
+    max_angle = 140
     path = ""
 
     try:
@@ -181,17 +180,19 @@ def main(args):
                             verdict_o_meter = [0,0,0]
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] <= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         verdict_o_meter = [0,0,0]
-                    print(verdict,verdict_o_meter)
+                    # print(verdict,verdict_o_meter)
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
                 # cv2.addWeighted(color,0.5,out_image,0.5,0)
 
             if deviation is not None:
                 now_time = time.time()
+                # print(now_time-last_time)
                 if int_speed < desired_speed:
                     int_speed += acceleration*(now_time-last_time)
                 if int_speed > desired_speed:
                     int_speed = desired_speed
+                int_speed = int(int_speed)
                 speed = [int_speed,int_speed]
                 Kp = 1.3
                 Kd = 0.15
