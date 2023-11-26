@@ -207,7 +207,11 @@ def main(args):
                 if enable_motors:
                     motors.speed = speed
                     motors.angle += radial_speed_servo*(now_time-last_time)
-                    if motors.angle > abs(max_angle) or motors.angle <= 0:
+                    if motors.angle > max_angle:
+                        motors.angle = max_angle
+                        radial_speed_servo *= -1
+                    elif motors.angle <= 0:
+                        motors.angle = 0
                         radial_speed_servo *= -1
                 last_time = now_time
                 last_E = E
