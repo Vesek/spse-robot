@@ -6,7 +6,7 @@ import busio
 import adafruit_pca9685
 
 # Define pins for motor controls
-STBY = 13
+STBY = 16
 AIN1 = 5
 AIN2 = 6
 BIN1 = 26
