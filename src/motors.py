@@ -83,5 +83,5 @@ class Motors:
         elif (self._angle > 180):
             self._angle = 180
         pulseWidth = self._angle * self.servo_step + 1000 # Angle * Degree represented in microseconds + Pulse for 0 degrees
-        duty = int((pulseWidth * 100) / float(self.period) * 0xFFFF)
+        duty = int((pulseWidth * 100) / float(self.period) / 100 * 0xFFFF)
         self.pca.channels[2].duty_cycle = duty

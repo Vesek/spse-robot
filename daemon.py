@@ -8,7 +8,7 @@ if __name__ == '__main__':
     GPIO.setup(21, GPIO.IN, GPIO.PUD_UP)
     def onButton(channel):
         print("Button pressed!")
-        if os.system("systemctl --user is-active --quiet spse-robot") != 0 or os.system("systemctl --user is-active --quiet spse-robot-audio") != 0:
+        if os.system("systemctl --user is-active --quiet spse-robot") != 0 and os.system("systemctl --user is-active --quiet spse-robot-audio") != 0:
             print("Starting spse-robot")
             os.system("systemctl --user start spse-robot")
             print("Starting spse-robot-audio")
