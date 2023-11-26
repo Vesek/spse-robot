@@ -41,7 +41,7 @@ def main(args):
     virt_camera = False
     stop_on_line = False
     detect_colors = False
-    start_speed = 0x7777
+    start_speed = 0x9999
     int_speed = 0x0000
     acceleration = start_speed * 2 # Reach full speed in half a second
     radial_speed_servo = 20 # In degrees per second
@@ -177,7 +177,7 @@ def main(args):
                             max_speed = 0x5555
                             verdict_o_meter = [0,0,0]
                         if verdict_o_meter[0] == 2:
-                            max_speed = 0x7777
+                            max_speed = 0x9999
                             verdict_o_meter = [0,0,0]
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] <= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         verdict_o_meter = [0,0,0]
@@ -194,7 +194,7 @@ def main(args):
                     int_speed = desired_speed
                 speed = [int_speed,int_speed]
                 Kp = 1.3
-                Kd = 0.1
+                Kd = 0.15
                 E = 1 - abs(deviation)
                 P = E * Kp
                 D = ((E - last_E) / (now_time - last_time)) * Kd
