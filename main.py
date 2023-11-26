@@ -44,7 +44,7 @@ def main(args):
     int_speed = 0x0000
     acceleration = start_speed * 2 # Reach full speed in half a second
     radial_speed_servo = 90 # In degrees per second
-    max_angle = 140
+    max_angle = 120
     path = ""
 
     try:
@@ -173,10 +173,10 @@ def main(args):
                         verdict_o_meter[2] += 1
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         if verdict_o_meter[0] == 1:
-                            max_speed = 0x5555
+                            desired_speed = 0x5555
                             verdict_o_meter = [0,0,0]
                         if verdict_o_meter[0] == 2:
-                            max_speed = 0x9999
+                            desired_speed = 0x9999
                             verdict_o_meter = [0,0,0]
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] <= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         verdict_o_meter = [0,0,0]
