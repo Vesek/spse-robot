@@ -41,7 +41,11 @@ def main(args):
     virt_camera = False
     stop_on_line = False
     detect_colors = False
-    max_speed = 0x7777
+    start_speed = 0x7777
+    int_speed = 0x0000
+    acceleration = start_speed * 2 # Reach full speed in half a second
+    radial_speed_servo = 20 # In degrees per second
+    max_angle = 30
     path = ""
 
     try:
@@ -122,6 +126,8 @@ def main(args):
     start_time = time.time()
     last_time = time.time()
     stop_time = None
+    desired_speed = start_speed
+    if enable_motors: motors.angle = 0
     if detect_colors:
         verdict_o_meter = [0,0,0] # Color, Number of frames with color, Number of frames from last color
         min_color_frames = 3
@@ -156,8 +162,8 @@ def main(args):
                         stop_time = time.time()
                     if stop_time is not None and ((time.time() - stop_time) > 0.5):
                         break
-                # if not headless and detect_colors: out_image = (color[:,:,:3] + out_image)[:,:,:3]
-                out_image = color
+                if not headless and detect_colors: out_image = (color[:,:,:3] + out_image)[:,:,:3]
+                # if not headless and detect_colors: out_image = color
                 if detect_colors:
                     if verdict[0] != 0:
                         if verdict_o_meter[0] == verdict[0]:
@@ -181,10 +187,14 @@ def main(args):
                 # cv2.addWeighted(color,0.5,out_image,0.5,0)
 
             if deviation is not None:
-                speed = [max_speed,max_speed]
+                now_time = time.time()
+                if int_speed < desired_speed:
+                    int_speed += acceleration*(now_time-last_time)
+                if int_speed > desired_speed:
+                    int_speed = desired_speed
+                speed = [int_speed,int_speed]
                 Kp = 1.3
                 Kd = 0.1
-                now_time = time.time()
                 E = 1 - abs(deviation)
                 P = E * Kp
                 D = ((E - last_E) / (now_time - last_time)) * Kd
@@ -193,7 +203,11 @@ def main(args):
                     speed[0] = round(speed[0] * output)
                 else:
                     speed[1] = round(speed[1] * output)
-                if enable_motors: motors.speed = speed
+                if enable_motors:
+                    motors.speed = speed
+                    motors.angle += radial_speed_servo*(now_time-last_time)
+                    if motors.angle > abs(max_angle) or motors.angle < 0:
+                        radial_speed_servo *= -1
                 last_time = now_time
                 last_E = E
                 # print(speed)
