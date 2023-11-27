@@ -176,7 +176,7 @@ def main(args):
                             desired_speed = 0x5555
                             verdict_o_meter = [0,0,0]
                         if verdict_o_meter[0] == 2:
-                            desired_speed = 0x9999
+                            desired_speed = start_speed
                             verdict_o_meter = [0,0,0]
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] <= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         verdict_o_meter = [0,0,0]
