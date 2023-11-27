@@ -39,9 +39,9 @@ def main(args):
     virt_camera = False
     stop_on_line = False
     detect_colors = False
-    start_speed = 0x7777
+    start_speed = 0x6666
     int_speed = 0x0000
-    acceleration = start_speed # Reach full speed in half a second
+    acceleration = start_speed / 5 # Reach full speed in half a second
     radial_speed_servo = 90 # In degrees per second
     max_angle = 110
     path = ""
