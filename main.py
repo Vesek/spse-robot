@@ -15,8 +15,7 @@ def print_help():
     print("When no args are entered the script just starts with default settings")
     print("\nArgs:")
     print("\t-h\t\tPrint this help and exits")
-    print(
-        "\t-g\t\tStarts with a graphics output, if on a Raspberry Pi, automatically assumes that framebuffer should be used")
+    print("\t-g\t\tStarts with a graphics output, if on a Raspberry Pi, automatically assumes that framebuffer should be used")
     print("\t--nofb\t\tForcibly disables framebuffer output")
     print("\t--nomotors\tForcibly disables motors")
     print("\t-m\t\tPrints frametimes after every frame")
@@ -40,11 +39,11 @@ def main(args):
     virt_camera = False
     stop_on_line = False
     detect_colors = False
-    start_speed = 0x9999
+    start_speed = 0x7777
     int_speed = 0x0000
-    acceleration = start_speed * 2 # Reach full speed in half a second
+    acceleration = start_speed # Reach full speed in half a second
     radial_speed_servo = 90 # In degrees per second
-    max_angle = 120
+    max_angle = 110
     path = ""
 
     try:
@@ -161,8 +160,8 @@ def main(args):
                         stop_time = time.time()
                     if stop_time is not None and ((time.time() - stop_time) > 0.5):
                         break
-                if not headless and detect_colors: out_image = (color[:,:,:3] + out_image)[:,:,:3]
-                # if not headless and detect_colors: out_image = color
+                # if not headless and detect_colors: out_image = (color[:,:,:3] + out_image)[:,:,:3]
+                if not headless and detect_colors: out_image = color
                 if detect_colors:
                     if verdict[0] != 0:
                         if verdict_o_meter[0] == verdict[0]:
@@ -173,10 +172,12 @@ def main(args):
                         verdict_o_meter[2] += 1
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         if verdict_o_meter[0] == 1:
+                            print("Red, new desired speed")
                             desired_speed = 0x5555
                             verdict_o_meter = [0,0,0]
                         if verdict_o_meter[0] == 2:
                             desired_speed = start_speed
+                            print("Green, new desired speed")
                             verdict_o_meter = [0,0,0]
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] <= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         verdict_o_meter = [0,0,0]
@@ -184,7 +185,7 @@ def main(args):
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
                 # cv2.addWeighted(color,0.5,out_image,0.5,0)
-
+                # out_image = frame
             if deviation is not None:
                 now_time = time.time()
                 # print(now_time-last_time)
