@@ -3,6 +3,7 @@ import cv2
 
 class Camera:
     def __init__(self,*args):
+        Picamera2.set_logging(Picamera2.ERROR)
         self.picam2 = Picamera2()
         config = self.picam2.create_preview_configuration(raw=self.picam2.sensor_modes[5])
         self.picam2.configure(config)
