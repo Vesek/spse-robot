@@ -36,6 +36,14 @@ class Motors:
         self.pca.channels[0].duty_cycle = self._speed[0]
         self.pca.channels[1].duty_cycle = self._speed[1]
 
+    def __del__(self):
+        self.pca.channels[0].duty_cycle = 0
+        self.pca.channels[1].duty_cycle = 0
+        for pin in OUT_PINS:
+            GPIO.output(pin, GPIO.LOW)
+        self.pca.deinit()
+        GPIO.cleanup()
+
     def enable(self,state=True): # TODO make this a property
         if state:
             GPIO.output(AIN2, GPIO.HIGH)
@@ -44,14 +52,6 @@ class Motors:
             GPIO.output(AIN2, GPIO.LOW)
             GPIO.output(BIN1, GPIO.LOW)
     
-    def deinit(self):
-        self.pca.channels[0].duty_cycle = 0
-        self.pca.channels[1].duty_cycle = 0
-        for pin in OUT_PINS:
-            GPIO.output(pin, GPIO.LOW)
-        self.pca.deinit()
-        GPIO.cleanup()
-
     def tocka(self):
         self.enable(False)
         self.speed = [0x2222,0x2222]

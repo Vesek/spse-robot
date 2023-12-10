@@ -3,8 +3,10 @@
 Description=SPSE-Robot button service
 
 [Service]
+Environment="LIBCAMERA_LOG_LEVELS=3"
 # Command to execute when the service is started
 ExecStart=/usr/bin/python /home/pi/spse-robot/daemon.py
+KillSignal=SIGINT
 # Disable Python's buffering of STDOUT and STDERR, so that output from the
 # service shows up immediately in systemd's logs
 Environment=PYTHONUNBUFFERED=1

@@ -9,12 +9,12 @@ class Camera:
         self.picam2.configure(config)
         self.picam2.start()
 
+    def __del__(self):
+        del self.picam2
+
     def capture(self):
         array = self.picam2.capture_array()
-        array = array[:,80:480,:] # Hopefully won'T need this
+        array = array[:,80:480,:] # Hopefully won't need this
         # array = array[:,:480,:]
         array = cv2.rotate(array, cv2.ROTATE_90_COUNTERCLOCKWISE)
         return array
-
-    def deinit(self):
-        del self.picam2
