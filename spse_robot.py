@@ -124,7 +124,7 @@ class Robot:
                     if self.args.show_raw: out_image = frame
                     if self.args.running_on_rpi and self.args.use_fb:
                         frame32 = cv2.cvtColor(out_image, cv2.COLOR_BGR2BGRA)
-                        fbframe = cv2.resize(frame32, fb_size)
+                        fbframe = cv2.resize(frame32, self.args.fb_size)
                         with open('/dev/fb0', 'rb+') as buf:
                             buf.write(fbframe)
                     else:
@@ -168,7 +168,7 @@ if __name__ == "__main__":
                         size = f.read()
                         fb_size = size[:-1].split(",")
                         fb_size = [int(side) for side in fb_size]
-                        fb_size = tuple(fb_size)
+                        args.fb_size = tuple(fb_size)
                 except FileNotFoundError:
                     args.use_fb = False
             else:
@@ -185,7 +185,7 @@ if __name__ == "__main__":
             from src.picam import Camera
         else:
             from src.webcam import Camera
-    
+
     try:
         camera = Camera(args.image)
     except:
