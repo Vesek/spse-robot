@@ -1,14 +1,10 @@
 import cv2
 import numpy as np
 import math
-import time
 
 class Analyzer:
-    def __init__(self, save_times=False):
-        self.save_times = save_times
-        if self.save_times:
-            self.framecounter = 0
-            self.times = {}
+    def __init__(self):
+        pass
 
     def find_colors(self,frame,render=False,otsu=False,centroid=None,thresh=None): # If it's stupid and it works, it is not stupid.
         if centroid is not None: # Cuts off the left part of the line because there will never be a color dot there (at least in our case)
@@ -64,12 +60,8 @@ class Analyzer:
                 output[:,:,1] = green
         # print(verdict)
         return verdict,output
-        
     
     def preprocessing(self,frame,otsu=False,kernel_size=(3,3)):
-        if self.save_times:
-            begin_time = time.time() # Save the time at which the preprocessing started
-            self.framecounter += 1 # Add one to the framecounter, as we can safely assume that preprocessing is the first point where this class interacts with a frame
         framegray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY) # Convert frame to grayscale
 
         ret = None
@@ -83,8 +75,6 @@ class Analyzer:
 
         kernel = np.ones(kernel_size,np.uint8)
         opening = cv2.morphologyEx(inverted, cv2.MORPH_OPEN, kernel) # Carry out a morphological opening on the thresholded image
-
-        if self.save_times: self.times['preprocessing_time'] = round(time.time()-begin_time,5) # Save how much time did preprocessing take
 
         return opening, ret
 
@@ -114,40 +104,3 @@ class Analyzer:
             dst2 = cv2.pointPolygonTest(contour, point2, True)
             return (dst1 > -20) and (dst2 > -20)
         return False
-
-    def detect_lines(self,frame): # Wasn't used in the final deployment, don't use unless you really hate yourself
-        if self.save_times: begin_time = time.time() # Save the time at which edge detection started
-        canny = cv2.Canny(frame, 1, 3)
-        if self.save_times: self.times['edge_detection_time'] = round(time.time()-begin_time,5) # Save how much time did edge detection take
-
-        if self.save_times: begin_time = time.time() # Save the time at which line detection started
-        rho = 1
-        theta = np.pi/180
-        threshold = 60
-        min_line_length = 30
-        max_line_gap = 20
-        lines = cv2.HoughLines(canny, rho, theta, threshold, None,
-                               min_line_length, max_line_gap, -1, 1)
-        if self.save_times: self.times['line_time'] = round(time.time()-begin_time,5) # Save how much time did line detection take
-
-        return lines
-
-    def process_lines(self,lines,frame=None): # Wasn't used in the final deployment, don't use unless you really hate yourself
-        if lines is not None:                 # No time checks here because it takes a very small amount of time
-            theta_avg = 0
-            for line in lines:
-                theta = line[0][1]
-                theta_avg += theta
-                if frame is not None:
-                    rho = line[0][0]
-                    a = math.cos(theta)
-                    b = math.sin(theta)
-                    x0 = a * rho
-                    y0 = b * rho
-                    pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
-                    pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-                    cv2.line(frame, pt1, pt2, (0,0,255), 1, cv2.LINE_AA)
-            theta_avg = theta_avg / len(lines)
-            return theta_avg, frame
-        return None, frame
-    
