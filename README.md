@@ -27,7 +27,3 @@ python main.py -h
 ```
 
 If you want a clean output to a framebuffer use the `blank_fb.sh` script.
-
-## TODO
-
-- [ ] Make a C++ version (maaaaaybe)
