@@ -27,7 +27,7 @@ video=HDMI-A-1:-32
 This argument sets the color depth to 32 bits so the frames can be rendered in full color. My attempts to make it work in 16 bit were unsuccesful.
 
 ## Usage
-For usage on you piece of hardware, you should review the code first, it is very much coded for our robot first and there are a lot of hardcoded values.
+For usage on you piece of hardware, you should review the code first, it is very much coded for our robot first and there are a lot of hardcoded values. Even the software part of things isn't much better, the systemd services have a hardcoded path to /home/pi/spse-robot (might change that).
 
 You can check the script's built-in help using
 ```
