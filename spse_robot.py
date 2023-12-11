@@ -117,7 +117,7 @@ class Robot:
                     last_time = now_time
                     last_E = E
                     if self.args.verbose:
-                        print(speed)
+                        print(out_speed)
 
                 if not self.args.headless:  # Display output
                     if self.args.show_preprocessed: out_image = preprocessed_frame
@@ -158,7 +158,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args() # headless, use_fb, motors, show_raw, show_preprocessed, image, stop_on_line, detect_colors, speed, acceleration, servo
     
-
     try:
         with open('/sys/firmware/devicetree/base/model') as f:  # Check if running on an Raspberry Pi
             model = f.read()
