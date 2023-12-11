@@ -1,6 +1,5 @@
 import RPi.GPIO as GPIO
 import systemd.daemon
-import time
 import os
 from spse_robot import Robot
 from src.picam import Camera
@@ -12,11 +11,12 @@ import sys
 import math
 import numpy as np
 
+os.environ["LIBCAMERA_LOG_LEVELS"] = "3"
 
 class namespace:
-    headless=False
+    headless=True
     use_fb=True
-    motors=False
+    motors=True
     show_raw=False
     show_preprocessed=False
     image=None
@@ -25,7 +25,7 @@ class namespace:
     speed=0x6666
     accel=speed/2
     servo=False
-    verbose=True
+    verbose=False
     running_on_rpi=True
     fb_size=(1920, 1080)
 
@@ -40,38 +40,27 @@ robot = Robot(camera, namespace)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(21, GPIO.IN, GPIO.PUD_UP)
 
-process = Process(target=robot.main_loop)
+process = None
+
+pressed = False
 
 def signalHandler(signal, frame):
     try:
         print("Stopping main loop")
         process.terminate()
+        process.join()
     except AttributeError:
         pass
     print("Stopping spse-robot-audio")
     os.system("systemctl --user stop spse-robot-audio")
-    process.join()
     shm.close()
     shm.unlink()
     sys.exit(0)
 
 def onButton(channel):
-    global process
+    global pressed
     print("Button pressed!")
-    print(process.is_alive())
-    if not process.is_alive() and os.system("systemctl --user is-active --quiet spse-robot-audio") != 0:
-        print("Starting main loop")
-        process.start()
-        print("Starting spse-robot-audio")
-        os.system("systemctl --user start spse-robot-audio")
-    else:
-        try:
-            print("Stopping main loop")
-            process.terminate()
-        except AttributeError:
-            pass
-        print("Stopping spse-robot-audio")
-        os.system("systemctl --user stop spse-robot-audio")
+    pressed = True
 
 signal.signal(signal.SIGINT, signalHandler)
 GPIO.add_event_detect(21, GPIO.FALLING, callback=onButton, bouncetime=1000)
@@ -80,4 +69,21 @@ systemd.daemon.notify('READY=1')
 while True:
     frame = real_camera.capture()
     buffer[:] = frame[:]
-    print(buffer.shape)
+    if pressed:
+        pressed = False
+        if process is None and os.system("systemctl --user is-active --quiet spse-robot-audio") != 0:
+            process = Process(target=robot.main_loop)
+            print("Starting main loop")
+            process.start()
+            print("Starting spse-robot-audio")
+            os.system("systemctl --user start spse-robot-audio")
+        else:
+            try:
+                print("Stopping main loop")
+                process.terminate()
+                process.join()
+            except AttributeError:
+                pass
+            process = None
+            print("Stopping spse-robot-audio")
+            os.system("systemctl --user stop spse-robot-audio")
