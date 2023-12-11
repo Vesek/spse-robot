@@ -1,3 +1,4 @@
+#!/bin/python3
 import RPi.GPIO as GPIO
 import systemd.daemon
 import os
