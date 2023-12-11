@@ -48,7 +48,6 @@ class Robot:
 
             while self.run:  # Main loop
                 frame = self.camera.capture()
-                print(frame.shape)
 
                 preprocessed_frame, thresh = analyzer.preprocessing(frame, otsu=True, kernel_size=(5, 5))
                 deviation, out_image, contour = analyzer.find_centroid(preprocessed_frame,render=not self.args.headless)
@@ -117,7 +116,8 @@ class Robot:
                             radial_speed_servo *= -1
                     last_time = now_time
                     last_E = E
-                    print(speed)
+                    if self.args.verbose:
+                        print(speed)
 
                 if not self.args.headless:  # Display output
                     if self.args.show_preprocessed: out_image = preprocessed_frame
@@ -154,6 +154,7 @@ if __name__ == "__main__":
     parser.add_argument('-s','--speed', help="Sets a new start speed (default = 0x6666)", default=0x6666, type=int)
     parser.add_argument('--accel','--acceleration', help="Sets a new start speed (default = 0x3333)", default=0x3333, type=int)
     parser.add_argument('--servo', help="Enables the serveo", action='store_true')
+    parser.add_argument('-v','--verbose', help="Prints aditional info", action='store_true')
 
     args = parser.parse_args() # headless, use_fb, motors, show_raw, show_preprocessed, image, stop_on_line, detect_colors, speed, acceleration, servo
     
