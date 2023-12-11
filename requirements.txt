@@ -1,4 +1,2 @@
 numpy
 opencv-python
-adafruit-circuitpython-pca9685
-systemd-python
