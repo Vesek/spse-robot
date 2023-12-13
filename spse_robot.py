@@ -95,7 +95,8 @@ class Robot:
                 
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
-                # cv2.addWeighted(color,0.5,out_image,0.5,0)
+                if self.args.detect_colors:
+                    out_image = out_image + color
 
                 if deviation is not None:
                     now_time = time.time()
@@ -162,7 +163,7 @@ if __name__ == "__main__":
     parser.add_argument('-p','--preprocessed', help="If graphics is enabled, forces rendering of the preprocessed image - for debugging use", action='store_true', dest="show_preprocessed")
     parser.add_argument('-i','--image', help="Loads an image from the filesystem as a \"camera\"", type=str)
     parser.add_argument('--stop', help="When enabled the robot will try to stop on the finish line", action='store_true', dest="stop_on_line")
-    parser.add_argument('-c','--colors', help="When enabled the robot will try to react to colored markings", action='store_true', dest="detect_colors")
+    parser.add_argument('-c','--colors', help="When enabled the robot will try to react to colored markings and show them on the output", action='store_true', dest="detect_colors")
     parser.add_argument('-s','--speed', help="Sets a new start speed (default = 0x6666)", default=0x6666, type=int)
     parser.add_argument('--accel','--acceleration', help="Sets a new start speed (default = 0x3333)", default=0x3333, type=int)
     parser.add_argument('--servo', help="Enables the serveo", action='store_true')
