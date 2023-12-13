@@ -11,6 +11,7 @@ import signal
 import sys
 import math
 import numpy as np
+from src.threadanalyzer import ThreadAnalyzer
 
 os.environ["LIBCAMERA_LOG_LEVELS"] = "3"
 
@@ -32,16 +33,21 @@ class namespace:
 
 real_camera = Camera()
 frame = real_camera.capture()
-shm = shared_memory.SharedMemory(create=True, size=frame.nbytes)
-buffer = np.ndarray(frame.shape, dtype=frame.dtype, buffer=shm.buf)
+main_shm = shared_memory.SharedMemory(create=True, size=frame.nbytes)
+buffer = np.ndarray(frame.shape, dtype=frame.dtype, buffer=main_shm.buf)
 
-camera = ThreadCamera(shm.name, frame.shape, frame.dtype)
+camera = ThreadCamera(main_shm.name, frame.shape, frame.dtype)
 robot = Robot(camera, namespace)
+
+analyzer_shm = shared_memory.SharedMemory(create=True, size=1)
+threadanalyzer = ThreadAnalyzer(main_shm.name, frame.shape, frame.dtype, analyzer_shm.name)
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(21, GPIO.IN, GPIO.PUD_UP)
 
 process = None
+
+analyzer_process = None
 
 pressed = False
 
@@ -50,12 +56,17 @@ def signalHandler(signal, frame):
         print("Stopping main loop")
         process.terminate()
         process.join()
+        print("Stopping analyzer loop")
+        analyzer_process.terminate()
+        analyzer_process.join()
     except AttributeError:
         pass
     print("Stopping spse-robot-audio")
     os.system("systemctl --user stop spse-robot-audio")
-    shm.close()
-    shm.unlink()
+    main_shm.close()
+    main_shm.unlink()
+    analyzer_shm.close()
+    analyzer_shm.unlink()
     sys.exit(0)
 
 def onButton(channel):
@@ -72,10 +83,13 @@ while True:
     buffer[:] = frame[:]
     if pressed:
         pressed = False
-        if process is None and os.system("systemctl --user is-active --quiet spse-robot-audio") != 0:
+        if process is None and analyzer_process is None and os.system("systemctl --user is-active --quiet spse-robot-audio") != 0:
             process = Process(target=robot.main_loop)
             print("Starting main loop")
             process.start()
+            analyzer_process = Process(target=threadanalyzer.main_loop)
+            print("Starting analyzer")
+            analyzer_process.start()
             print("Starting spse-robot-audio")
             os.system("systemctl --user start spse-robot-audio")
         else:
@@ -83,8 +97,12 @@ while True:
                 print("Stopping main loop")
                 process.terminate()
                 process.join()
+                print("Stopping analyzer loop")
+                analyzer_process.terminate()
+                analyzer_process.join()
             except AttributeError:
                 pass
             process = None
+            analyzer_process = None
             print("Stopping spse-robot-audio")
             os.system("systemctl --user stop spse-robot-audio")

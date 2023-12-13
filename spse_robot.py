@@ -6,11 +6,13 @@ import sys
 import argparse
 import signal
 import os
+from multiprocessing import shared_memory
 
 class Robot:
-    def __init__(self, camera, args):
+    def __init__(self, camera, args, mp_analyzer=None):
         self.camera = camera
         self.args = args
+        self.mp_analyzer = mp_analyzer
 
         if self.args.servo:
             self.radial_speed_servo = 90 # In degrees per second
@@ -23,6 +25,10 @@ class Robot:
             motors.enable()
 
         analyzer = Analyzer()
+        if self.mp_analyzer is not None:
+            analyzer_shm = shared_memory.SharedMemory(name=self.mp_analyzer)
+            color_placeholder = np.zeros((640,480,3),dtype=np.uint8)
+            cv2.putText(img=color_placeholder, text="MULTITHREADED COLORS", org=(20, 30), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(255, 0, 0),thickness=2)
 
         last_E = 0
         start_time = time.time()
@@ -51,7 +57,13 @@ class Robot:
 
                 preprocessed_frame, thresh = analyzer.preprocessing(frame, otsu=True, kernel_size=(5, 5))
                 deviation, out_image, contour = analyzer.find_centroid(preprocessed_frame,render=not self.args.headless)
-                if self.args.detect_colors: verdict, color = analyzer.find_colors(frame, render=not self.args.headless, otsu=True, centroid=deviation, thresh=thresh)
+                if self.args.detect_colors:
+                    if self.mp_analyzer is None:
+                        verdict, color = analyzer.find_colors(frame, render=not self.args.headless, otsu=True, centroid=deviation, thresh=thresh)
+                    else:
+                        verdict = [int.from_bytes(analyzer_shm.buf),0]
+                        color = color_placeholder
+                        
 
                 if self.args.stop_on_line:
                     sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0]*0.15), int(frame.shape[1]*0.42)), (int(frame.shape[0]*0.85), int(frame.shape[1]*0.42))) # Completely ✨ arbitrary ✨ numbers
@@ -193,5 +205,5 @@ if __name__ == "__main__":
         sys.exit()
     
     print(args)
-    robot = Robot(camera,args)
+    robot = Robot(camera=camera,args=args)
     robot.main_loop()
