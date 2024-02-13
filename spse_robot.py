@@ -95,7 +95,7 @@ class Robot:
                 
                 # out_image[:,:,0] = color[:,:,0]
                 # np.logical_or(color[:,:,0],out_image[:,:,0],out_image[:,:,0])
-                if self.args.detect_colors:
+                if self.args.detect_colors and not self.args.headless:
                     out_image = out_image + color
 
                 if deviation is not None:
