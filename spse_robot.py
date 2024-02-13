@@ -35,6 +35,7 @@ class Robot:
         last_time = start_time
 
         stop_time = None
+        start_speed = self.args.speed
         desired_speed = self.args.speed
         speed = 0
         if self.args.running_on_rpi and self.args.motors: motors.angle = 0
