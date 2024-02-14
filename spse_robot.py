@@ -20,7 +20,7 @@ class Robot:
             self.max_angle = 110
 
     def main_loop(self):
-        if self.args.running_on_rpi and self.args.motors:
+        if self.args.running_on_rpi and self.args.motors:  # Initialize motors only when running on a Raspberry Pi
             from src.motors import Motors
             motors = Motors()
             motors.enable()
@@ -39,7 +39,7 @@ class Robot:
         start_speed = self.args.speed
         desired_speed = self.args.speed
         speed = 0
-        if self.args.running_on_rpi and self.args.motors:
+        if self.args.running_on_rpi and self.args.motors:  # Reset the servo to 0
             motors.angle = 0
         if self.args.detect_colors:
             verdict_o_meter = [0, 0, 0]  # Color, Number of frames with color, Number of frames from last color
@@ -48,15 +48,17 @@ class Robot:
 
         self.run = True
 
-        def handler(signal, frame):
+        def handler(signal, frame):  # This will be called on SIGTERM
             self.run = False
 
         signal.signal(signal.SIGTERM, handler)
 
         try:
-
             while self.run:  # Main loop
                 frame = self.camera.capture()
+
+                if self.args.verbose:
+                    metrics_time = time.time()
 
                 preprocessed_frame, thresh = analyzer.preprocessing(frame, otsu=True, kernel_size=(5, 5))
                 deviation, out_image, contour = analyzer.find_centroid(preprocessed_frame, render=not self.args.headless)
@@ -131,6 +133,7 @@ class Robot:
                     last_time = now_time
                     last_E = E
                     if self.args.verbose:
+                        print("Main control loop took", int((time.time() - metrics_time) * 1000), "ms")
                         print(out_speed)
 
                 if not self.args.headless:  # Display output
