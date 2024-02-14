@@ -45,21 +45,21 @@ class Motors:
         self.pca.deinit()
         GPIO.cleanup()
 
-    def enable(self,state=True): # TODO make this a property
+    def enable(self, state=True):  # TODO make this a property
         if state:
             GPIO.output(AIN2, GPIO.HIGH)
             GPIO.output(BIN1, GPIO.HIGH)
         else:
             GPIO.output(AIN2, GPIO.LOW)
             GPIO.output(BIN1, GPIO.LOW)
-    
+
     def tocka(self):
         self.enable(False)
-        self.speed = [0x2222,0x2222]
+        self.speed = [0x2222, 0x2222]
         GPIO.output(AIN2, GPIO.HIGH)
         GPIO.output(BIN2, GPIO.HIGH)
         time.sleep(2.4)
-        self.speed = [0x0000,0x0000]
+        self.speed = [0x0000, 0x0000]
         self.enable(False)
 
     @property
@@ -83,6 +83,6 @@ class Motors:
             self._angle = 0
         elif (self._angle > 180):
             self._angle = 180
-        pulseWidth = self._angle * self.servo_step + 1000 # Angle * Degree represented in microseconds + Pulse for 0 degrees
+        pulseWidth = self._angle * self.servo_step + 1000  # Angle * Degree represented in microseconds + Pulse for 0 degrees
         duty = int((pulseWidth * 100) / float(self.period) / 100 * 0xFFFF)
         self.pca.channels[2].duty_cycle = duty
