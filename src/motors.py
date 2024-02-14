@@ -1,7 +1,7 @@
 import time
 
 import RPi.GPIO as GPIO
-import board # Not setting GPIO.setmode(GPIO.BCM) manually because this already does it
+import board  # Not setting GPIO.setmode(GPIO.BCM) manually because this already does it
 import busio
 import adafruit_pca9685
 
@@ -14,10 +14,11 @@ BIN2 = 19
 
 OUT_PINS = [STBY, AIN1, AIN2, BIN1, BIN2]
 
+
 class Motors:
 
     def __init__(self):
-        self._speed = [0,0]
+        self._speed = [0, 0]
         self._angle = 0
         # Init all the pins
         for pin in OUT_PINS:

@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 
+
 class Camera:
-    def __init__(self,*args):
+    def __init__(self, *args):
         self.cam = cv2.VideoCapture(0)
         if not self.cam.read()[0]:
             raise Exception("Camera error")
@@ -13,6 +14,6 @@ class Camera:
     def capture(self):
         check, frame = self.cam.read()
         if frame is None:
-            frame = np.zeros((640, 480, 3),dtype=np.uint8)
-        frame = cv2.resize(frame, (640,480))
+            frame = np.zeros((640, 480, 3), dtype=np.uint8)
+        frame = cv2.resize(frame, (640, 480))
         return frame

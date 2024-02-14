@@ -9,27 +9,28 @@ from multiprocessing import Process
 from multiprocessing import shared_memory
 import signal
 import sys
-import math
 import numpy as np
 from src.threadanalyzer import ThreadAnalyzer
 
 os.environ["LIBCAMERA_LOG_LEVELS"] = "3"
 
+
 class namespace:
-    headless=True
-    use_fb=True
-    motors=True
-    show_raw=False
-    show_preprocessed=False
-    image=None
-    stop_on_line=True
-    detect_colors=True
-    speed=0x6666
-    accel=speed/2
-    servo=False
-    verbose=False
-    running_on_rpi=True
-    fb_size=(1920, 1080)
+    headless = True
+    use_fb = True
+    motors = True
+    show_raw = False
+    show_preprocessed = False
+    image = None
+    stop_on_line = True
+    detect_colors = True
+    speed = 0x6666
+    accel = speed / 2
+    servo = False
+    verbose = False
+    running_on_rpi = True
+    fb_size = (1920, 1080)
+
 
 real_camera = Camera()
 frame = real_camera.capture()
@@ -51,6 +52,7 @@ analyzer_process = None
 
 pressed = False
 
+
 def signalHandler(signal, frame):
     try:
         print("Stopping main loop")
@@ -69,10 +71,12 @@ def signalHandler(signal, frame):
     analyzer_shm.unlink()
     sys.exit(0)
 
+
 def onButton(channel):
     global pressed
     print("Button pressed!")
     pressed = True
+
 
 signal.signal(signal.SIGINT, signalHandler)
 GPIO.add_event_detect(21, GPIO.FALLING, callback=onButton, bouncetime=1000)
