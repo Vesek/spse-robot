@@ -23,7 +23,7 @@ class Motors:
         
 
     def enable(self,state=True):
-        self.spi.xfer([state])
+        self.spi.xfer([state, 0x05])
 
     @property
     def speed(self):
