@@ -21,9 +21,14 @@ class Robot:
 
     def main_loop(self):
         if self.args.running_on_rpi and self.args.motors:  # Initialize motors only when running on a Raspberry Pi
-            from src.motors import Motors
-            motors = Motors()
-            motors.enable()
+            if self.args.legacy_motors:
+                from src.motors import Motors
+                motors = Motors()
+                motors.enable()
+            else:
+                from src.motors_rp2040 import Motors
+                motors = Motors()
+                motors.enable()
 
         analyzer = Analyzer()
         if self.mp_analyzer is not None:
@@ -87,11 +92,12 @@ class Robot:
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         if verdict_o_meter[0] == 1:
                             print("Red, new desired speed")
-                            desired_speed = 0x4444
+                            desired_speed = int(self.args.speed*0.6)
                         if verdict_o_meter[0] == 2:
                             print("Green, new desired speed")
-                            desired_speed = start_speed
-                        verdict_o_meter = [0, 0, 0]
+                            desired_speed = self.args.speed
+                            
+                        verdict_o_meter = [0,0,0]
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] <= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         verdict_o_meter = [0, 0, 0]
                     # print(verdict,verdict_o_meter)
@@ -174,10 +180,11 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--speed', help="Sets a new start speed (default = 0x6666)", default=0x6666, type=int)
     parser.add_argument('--accel', '--acceleration', help="Sets a new start speed (default = 0x3333)", default=0x3333, type=int)
     parser.add_argument('--servo', help="Enables the serveo", action='store_true')
-    parser.add_argument('-v', '--verbose', help="Prints aditional info", action='store_true')
+    parser.add_argument('-v','--verbose', help="Prints aditional info", action='store_true')
+    parser.add_argument('-lm','--legacy-motors', help="When enabled the old I2C motor driver will be used", action='store_true', dest="legacy_motors")
 
-    args = parser.parse_args()  # headless, use_fb, motors, show_raw, show_preprocessed, image, stop_on_line, detect_colors, speed, acceleration, servo
-
+    args = parser.parse_args() # headless, use_fb, motors, show_raw, show_preprocessed, image, stop_on_line, detect_colors, speed, acceleration, servo, verbose, legacy_motors
+    
     try:
         with open('/sys/firmware/devicetree/base/model') as f:  # Check if running on an Raspberry Pi
             model = f.read()

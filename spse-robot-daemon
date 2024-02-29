@@ -14,23 +14,24 @@ from src.threadanalyzer import ThreadAnalyzer
 
 os.environ["LIBCAMERA_LOG_LEVELS"] = "3"
 
+BUTTON_PIN = 17
 
 class namespace:
-    headless = True
-    use_fb = True
-    motors = True
-    show_raw = False
-    show_preprocessed = False
-    image = None
-    stop_on_line = True
-    detect_colors = True
-    speed = 0x6666
-    accel = speed / 2
-    servo = False
-    verbose = False
-    running_on_rpi = True
-    fb_size = (1920, 1080)
-
+    headless=True
+    use_fb=True
+    motors=True
+    show_raw=False
+    show_preprocessed=False
+    image=None
+    stop_on_line=True
+    detect_colors=True
+    speed=0x6666
+    accel=speed/2
+    servo=False
+    verbose=False
+    running_on_rpi=True
+    fb_size=(1920, 1080)
+    legacy_motors=False
 
 real_camera = Camera()
 frame = real_camera.capture()
@@ -44,7 +45,7 @@ analyzer_shm = shared_memory.SharedMemory(create=True, size=1)
 threadanalyzer = ThreadAnalyzer(main_shm.name, frame.shape, frame.dtype, analyzer_shm.name)
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(21, GPIO.IN, GPIO.PUD_UP)
+GPIO.setup(BUTTON_PIN, GPIO.IN, GPIO.PUD_UP)
 
 process = None
 
@@ -79,7 +80,7 @@ def onButton(channel):
 
 
 signal.signal(signal.SIGINT, signalHandler)
-GPIO.add_event_detect(21, GPIO.FALLING, callback=onButton, bouncetime=1000)
+GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=onButton, bouncetime=1000)
 print("Initialzed!")
 systemd.daemon.notify('READY=1')
 while True:
