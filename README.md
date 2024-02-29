@@ -17,7 +17,7 @@ pip install -r requirements.txt
 
 You can use a venv but in the case of the Pi I don't think it's necessary.
 ```
-sudo apt install python3-picamera2 python3-rpi.gpio python3-systemd python3-opencv python3-numpy
+sudo apt install python3-picamera2 python3-rpi.gpio python3-systemd python3-opencv python3-numpy python3-spidev
 ```
 
 For the framebuffer output to work correctly, it needs this added to `/boot/cmdline.txt` of your RPi:
@@ -25,6 +25,8 @@ For the framebuffer output to work correctly, it needs this added to `/boot/cmdl
 video=HDMI-A-1:-32
 ```
 This argument sets the color depth to 32 bits so the frames can be rendered in full color. My attempts to make it work in 16 bit were unsuccesful.
+
+For the use with our PCB you will need to enable SPI using `raspi-config`.
 
 ## Usage
 For usage on you piece of hardware, you should review the code first, it is very much coded for our robot first and there are a lot of hardcoded values. Even the software part of things isn't much better, the systemd services have a hardcoded path to /home/pi/spse-robot (might change that).
