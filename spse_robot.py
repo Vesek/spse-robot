@@ -20,9 +20,14 @@ class Robot:
 
     def main_loop(self):
         if self.args.running_on_rpi and self.args.motors:
-            from src.motors import Motors
-            motors = Motors()
-            motors.enable()
+            if self.args.legacy_motors:
+                from src.motors import Motors
+                motors = Motors()
+                motors.enable()
+            else:
+                from src.motors_rp2040 import Motors
+                motors = Motors()
+                motors.enable()
 
         analyzer = Analyzer()
         if self.mp_analyzer is not None:
@@ -168,8 +173,9 @@ if __name__ == "__main__":
     parser.add_argument('--accel','--acceleration', help="Sets a new start speed (default = 0x3333)", default=0x3333, type=int)
     parser.add_argument('--servo', help="Enables the serveo", action='store_true')
     parser.add_argument('-v','--verbose', help="Prints aditional info", action='store_true')
+    parser.add_argument('-lm','--legacy-motors', help="When enabled the old I2C motor driver will be used", action='store_true', dest="legacy_motors")
 
-    args = parser.parse_args() # headless, use_fb, motors, show_raw, show_preprocessed, image, stop_on_line, detect_colors, speed, acceleration, servo
+    args = parser.parse_args() # headless, use_fb, motors, show_raw, show_preprocessed, image, stop_on_line, detect_colors, speed, acceleration, servo, verbose, legacy_motors
     
     try:
         with open('/sys/firmware/devicetree/base/model') as f:  # Check if running on an Raspberry Pi
