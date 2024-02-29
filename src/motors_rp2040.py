@@ -12,9 +12,9 @@ class Motors:
 
         self.spi.max_speed_hz = 4000000
 
-        self.servo_range = 1000
-        self.servo_step = self.servo_range / float(180)
-        self.period = (1000000 / 100) # 100 is the frequency of the PWM
+        self.servo_base = 501
+        self.servo_step = 1995 / float(180) # 1995 is the maximum range of the servo with some safeguards added
+        self.period = (1000000 / 100) # Perion of PWM in us
 
     def __del__(self):
         self.spi.xfer([0x00])
@@ -56,7 +56,7 @@ class Motors:
         elif (self._angle > 180):
             self._angle = 180
 
-        pulseWidth = self._angle * self.servo_step + 1000 # Angle * Degree represented in microseconds + Pulse for 0 degrees
-        duty = int((pulseWidth * 100) / float(self.period) / 100 * 0xFFFF)
+        pulseWidth = self._angle * self.servo_step + self.servo_base # Angle * Degree represented in microseconds + Pulse for 0 degrees
+        duty = int((pulseWidth / float(self.period)) * 0xFFFF)
         h1,h2 = duty.to_bytes(2, "big")
         self.spi.xfer([0x20, h1, h2])
