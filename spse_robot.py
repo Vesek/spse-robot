@@ -125,13 +125,13 @@ class Robot:
                         out_speed = [round(speed) , round(speed * output)]
                     if self.args.running_on_rpi and self.args.motors:
                         motors.speed = out_speed
-                        motors.angle += radial_speed_servo*(now_time-last_time)
+                        motors.angle += self.radial_speed_servo*(now_time-last_time)
                         if motors.angle > max_angle:
                             motors.angle = max_angle
-                            radial_speed_servo *= -1
+                            self.radial_speed_servo *= -1
                         elif motors.angle <= 0:
                             motors.angle = 0
-                            radial_speed_servo *= -1
+                            self.radial_speed_servo *= -1
                     last_time = now_time
                     last_E = E
                     if self.args.verbose:
