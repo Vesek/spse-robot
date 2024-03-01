@@ -103,5 +103,5 @@ class Analyzer:
         if contour is not None:  # It just checks if those two pixels are in the line, simple but effective
             dst1 = cv2.pointPolygonTest(contour, point1, True)
             dst2 = cv2.pointPolygonTest(contour, point2, True)
-            return (dst1 > -20) and (dst2 > -20)
+            return (dst1 > -30) and (dst2 > -30)
         return False

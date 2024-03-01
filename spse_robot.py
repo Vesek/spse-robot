@@ -114,8 +114,8 @@ class Robot:
                     if speed > desired_speed:
                         speed = desired_speed
 
-                    Kp = 1.3
-                    Kd = 0.15
+                    Kp = 1.4
+                    Kd = 0.2
                     E = 1 - abs(deviation)
 
                     P = E * Kp
