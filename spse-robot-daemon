@@ -25,7 +25,7 @@ class namespace:
     image=None
     stop_on_line=True
     detect_colors=False
-    speed=0x5555
+    speed=0x7000
     accel=speed/2
     servo=False
     verbose=False
