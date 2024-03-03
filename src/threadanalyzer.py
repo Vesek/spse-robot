@@ -16,8 +16,8 @@ class ThreadAnalyzer:  # WHY DOES THIS HAVE TO EXIST (i want to unalive myself)
         self.output_shm.unlink()
 
     def main_loop(self):
-        y_cut = int(len(self.buffer)*0.7)
-        x_cut = int(len(self.buffer)*0.7)
+        y_cut = int(buffer.shape[0]*0.7)
+        x_cut = int(buffer.shape[1]*0.7)
         while True:
             out, _ = self.analyzer.find_colors(self.buffer[y_cut:,x_cut:,:])
             self.output_shm.buf[0] = out[0]
