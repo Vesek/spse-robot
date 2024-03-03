@@ -15,6 +15,15 @@ class Robot:
         self.args = args
         self.mp_analyzer = mp_analyzer
 
+        try:
+            with open('/sys/class/graphics/fb0/virtual_size') as f:  # Get framebuffer size
+                size = f.read()
+                fb_size = size[:-1].split(",")
+                fb_size = [int(side) for side in fb_size]
+                self.args.fb_size = tuple(fb_size)
+        except FileNotFoundError:
+            self.args.use_fb = False
+
         if self.args.servo:
             self.radial_speed_servo = 90  # In degrees per second
             self.max_angle = 110
@@ -30,10 +39,12 @@ class Robot:
                 motors = Motors()
                 motors.enable()
 
+        frame = self.camera.capture() # So we can get the shape of the array
+
         analyzer = Analyzer()
         if self.mp_analyzer is not None:
             analyzer_shm = shared_memory.SharedMemory(name=self.mp_analyzer)
-            color_placeholder = np.zeros((640, 480, 3), dtype=np.uint8)
+            color_placeholder = np.zeros(frame.shape, dtype=np.uint8)
             cv2.putText(img=color_placeholder, text="MULTITHREADED COLORS", org=(20, 30), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(255, 0, 0), thickness=2)
 
         last_E = 0
@@ -115,7 +126,7 @@ class Robot:
                         speed = desired_speed
 
                     Kp = 1.1
-                    Kd = 0.08
+                    Kd = 0.1
                     E = 1 - abs(deviation)
 
                     P = E * Kp
@@ -190,14 +201,6 @@ if __name__ == "__main__":
             model = f.read()
             if "Raspberry" in model:
                 args.running_on_rpi = True
-                try:
-                    with open('/sys/class/graphics/fb0/virtual_size') as f:  # Get framebuffer size
-                        size = f.read()
-                        fb_size = size[:-1].split(",")
-                        fb_size = [int(side) for side in fb_size]
-                        args.fb_size = tuple(fb_size)
-                except FileNotFoundError:
-                    args.use_fb = False
             else:
                 args.running_on_rpi = False
     except FileNotFoundError:  # If the file doesn't exist automatically assume a PC

@@ -24,7 +24,7 @@ class namespace:
     show_preprocessed=False
     image=None
     stop_on_line=True
-    detect_colors=False
+    detect_colors=True
     speed=0x7000
     accel=speed/2
     servo=False
@@ -39,10 +39,11 @@ main_shm = shared_memory.SharedMemory(create=True, size=frame.nbytes)
 buffer = np.ndarray(frame.shape, dtype=frame.dtype, buffer=main_shm.buf)
 
 camera = ThreadCamera(main_shm.name, frame.shape, frame.dtype)
-robot = Robot(camera, namespace)
+# robot = Robot(camera, namespace)
 
 analyzer_shm = shared_memory.SharedMemory(create=True, size=1)
 threadanalyzer = ThreadAnalyzer(main_shm.name, frame.shape, frame.dtype, analyzer_shm.name)
+robot = Robot(camera, namespace, analyzer_shm.name)
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, GPIO.PUD_UP)

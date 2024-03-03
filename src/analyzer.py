@@ -6,7 +6,7 @@ class Analyzer:
     def __init__(self):
         pass
 
-    def find_colors(self, frame, render=False, otsu=False, centroid=None, thresh=None):  # If it's stupid and it works, it is not stupid.
+    def find_colors(self, frame, render=False, otsu=True, centroid=None, thresh=None):  # If it's stupid and it works, it is not stupid.
         if centroid is not None:  # Cuts off the left part of the line because there will never be a color dot there (at least in our case)
             cut = int((centroid + 1) * (frame.shape[1] / 2))
             channels = [frame[:, cut:, 0], frame[:, cut:, 1], frame[:, cut:, 2]]
@@ -16,14 +16,14 @@ class Analyzer:
             if otsu:  # Pick which thresholding to use based on arguments
                 blur = cv2.GaussianBlur(channels[i], (3, 3), 0)  # Decided on with  C R E A T I V E  measures
                 if thresh is None:  # If combined thresholding is enabled use that, otherwise use otsu
-                    ret, th = cv2.threshold(blur, 0, 255, cv2.THRESH_OTSU)
+                    ret, th = cv2.threshold(blur, 100, 255, cv2.THRESH_OTSU)
                 else:
                     ret, th = cv2.threshold(blur, thresh, 255, cv2.THRESH_BINARY)
             else:  # THIS IS NOT TESTED, ADAPTIVE THRESHOLDING SUCKS ANYWAY
                 th = cv2.adaptiveThreshold(channels[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 33, 4)
-            kernel = np.ones((3, 3), np.uint8)
-            opening = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel)  # For good measure :)
-            channels[i] = opening
+            kernel = np.ones((13, 13), np.uint8)
+            opening = cv2.morphologyEx(th, cv2.MORPH_ERODE, kernel)  # For good measure :)
+            channels[i] = opening[int(opening.shape[0]*0.5):,int(opening.shape[1]*0.5):]
         # red = np.bitwise_and(channels[2],np.bitwise_not(channels[1]))
         # green = np.bitwise_and(channels[1],np.bitwise_not(channels[2]))
         red = np.bitwise_and(np.bitwise_and(channels[0], np.bitwise_not(channels[1])), np.bitwise_not(channels[2]))  # Remove white and off color things from our filtered images
@@ -37,13 +37,13 @@ class Analyzer:
 
         if len(red_contours) != 0:
             red_contour = max(red_contours, key=cv2.contourArea)
-            if cv2.contourArea(red_contour) >= 20:  # Save the final verdict only if it's pretty confident
+            if cv2.contourArea(red_contour) >= 40:  # Save the final verdict only if it's pretty confident
                 if render:
                     cv2.drawContours(red, [red_contour], -1, 255, 3)
                 verdict = [1, cv2.contourArea(red_contour)]
         if len(green_contours) != 0:
             green_contour = max(green_contours, key=cv2.contourArea)
-            if cv2.contourArea(green_contour) >= 20:  # Save the final verdict only if it's pretty confident
+            if cv2.contourArea(green_contour) >= 40:  # Save the final verdict only if it's pretty confident
                 if render:
                     cv2.drawContours(green, [green_contour], -1, 255, 3)
                 verdict = [2, cv2.contourArea(green_contour)]
