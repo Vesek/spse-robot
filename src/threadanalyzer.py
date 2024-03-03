@@ -1,6 +1,7 @@
 from multiprocessing import shared_memory
 from .analyzer import Analyzer
 import numpy as np
+import cv2
 
 
 class ThreadAnalyzer:  # WHY DOES THIS HAVE TO EXIST (i want to unalive myself)
@@ -16,6 +17,17 @@ class ThreadAnalyzer:  # WHY DOES THIS HAVE TO EXIST (i want to unalive myself)
         self.output_shm.unlink()
 
     def main_loop(self):
+        #with open('/sys/class/graphics/fb0/virtual_size') as f:  # Get framebuffer size
+        #    size = f.read()
+        #    fb_size = size[:-1].split(",")
+        #    fb_size = [int(side) for side in fb_size]
+        #    fb_size = tuple(fb_size)
+
         while True:
-            out, _ = self.analyzer.find_colors(self.buffer, otsu=True)
+            out, _ = self.analyzer.find_colors(self.buffer, otsu=True, render=False)
+           # frame32 = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+           # fbframe = cv2.resize(frame32, fb_size)
+           # with open('/dev/fb0', 'rb+') as buf:
+           #     buf.write(fbframe)
+
             self.output_shm.buf[0] = out[0]

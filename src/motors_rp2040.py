@@ -20,7 +20,6 @@ class Motors:
         self.spi.xfer([0x00])
 
         self.spi.close()
-        
 
     def enable(self,state=True):
         self.spi.xfer([state, 0x05])

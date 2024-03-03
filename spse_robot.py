@@ -86,7 +86,7 @@ class Robot:
                         color = color_placeholder
 
                 if self.args.stop_on_line:
-                    sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.42)), (int(frame.shape[0] * 0.85), int(frame.shape[1] * 0.42)))  # Completely ✨ arbitrary ✨ numbers
+                    sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.6)), (int(frame.shape[0] * 0.85), int(frame.shape[1] * 0.6)))  # Completely ✨ arbitrary ✨ numbers
                     if sf_detect and ((time.time() - start_time) > 10):
                         stop_time = time.time()
                     if stop_time is not None and ((time.time() - stop_time) > 0.5):
