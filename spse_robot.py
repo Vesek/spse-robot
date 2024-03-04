@@ -119,7 +119,7 @@ class Robot:
                     if self.args.stop_on_line:
                         sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), (int(frame.shape[0] * 0.85), int(frame.shape[1] * 0.45)))  # Completely ✨ arbitrary ✨ numbers
                         if sf_detect and ((time.time() - start_time) > 10):
-                            cv2.imwrite('amogus.jpg', cv2.circle(img=frame, center=(int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), radius=5, color=(0,0,255), thickness=-1))
+                            # cv2.imwrite('amogus.jpg',)
                             stop_time = time.time()
                         if stop_time is not None and ((time.time() - stop_time) > 0.5):
                             break
@@ -165,6 +165,8 @@ class Robot:
                         out_image = preprocessed_frame
                     if self.args.show_raw:
                         out_image = frame
+                    out_image = cv2.circle(out_image, (int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), 5, (0,255,0), -1)
+                    out_image = cv2.circle(out_image, (int(frame.shape[0] * 0.85), int(frame.shape[1] * 0.45)), 5, (0,255,0), -1)
                     if self.args.running_on_rpi and self.args.use_fb:
                         frame32 = cv2.cvtColor(out_image, cv2.COLOR_BGR2BGRA)
                         fbframe = cv2.resize(frame32, self.args.fb_size)

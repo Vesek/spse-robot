@@ -22,7 +22,7 @@ class Analyzer:
             else:  # THIS IS NOT TESTED, ADAPTIVE THRESHOLDING SUCKS ANYWAY
                 th = cv2.adaptiveThreshold(channels[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 33, 4)
             kernel = np.ones((13, 13), np.uint8)
-            opening = cv2.morphologyEx(th, cv2.MORPH_ERODE, kernel)  # For good measure :)
+            opening = cv2.morphologyEx(th, cv2.MORPH_DILATE, kernel)  # For good measure :)
             channels[i] = opening #[int(opening.shape[0]*0.5):,int(opening.shape[1]*0.5):]
         # red = np.bitwise_and(channels[2],np.bitwise_not(channels[1]))
         # green = np.bitwise_and(channels[1],np.bitwise_not(channels[2]))
