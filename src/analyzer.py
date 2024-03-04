@@ -16,14 +16,14 @@ class Analyzer:
             if otsu:  # Pick which thresholding to use based on arguments
                 blur = cv2.GaussianBlur(channels[i], (3, 3), 0)  # Decided on with  C R E A T I V E  measures
                 if thresh is None:  # If combined thresholding is enabled use that, otherwise use otsu
-                    ret, th = cv2.threshold(blur, 100, 255, cv2.THRESH_OTSU)
+                    ret, th = cv2.threshold(blur, 0, 255, cv2.THRESH_OTSU)
                 else:
                     ret, th = cv2.threshold(blur, thresh, 255, cv2.THRESH_BINARY)
             else:  # THIS IS NOT TESTED, ADAPTIVE THRESHOLDING SUCKS ANYWAY
                 th = cv2.adaptiveThreshold(channels[i], 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 33, 4)
             kernel = np.ones((13, 13), np.uint8)
             opening = cv2.morphologyEx(th, cv2.MORPH_ERODE, kernel)  # For good measure :)
-            channels[i] = opening[int(opening.shape[0]*0.5):,int(opening.shape[1]*0.5):]
+            channels[i] = opening #[int(opening.shape[0]*0.5):,int(opening.shape[1]*0.5):]
         # red = np.bitwise_and(channels[2],np.bitwise_not(channels[1]))
         # green = np.bitwise_and(channels[1],np.bitwise_not(channels[2]))
         red = np.bitwise_and(np.bitwise_and(channels[0], np.bitwise_not(channels[1])), np.bitwise_not(channels[2]))  # Remove white and off color things from our filtered images

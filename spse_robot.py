@@ -39,7 +39,11 @@ class Robot:
                 motors = Motors()
                 motors.enable()
 
+        motors.speed = [0,0]
+
         frame = self.camera.capture() # So we can get the shape of the array
+
+        print(frame.shape)
 
         analyzer = Analyzer()
         if self.mp_analyzer is not None:
@@ -59,7 +63,7 @@ class Robot:
             motors.angle = 0
         if self.args.detect_colors:
             verdict_o_meter = [0, 0, 0]  # Color, Number of frames with color, Number of frames from last color
-            min_color_frames = 3
+            min_color_frames = 5
             max_noncolor_frames = 2
 
         self.run = True
@@ -78,16 +82,18 @@ class Robot:
 
                 preprocessed_frame, thresh = analyzer.preprocessing(frame, otsu=True, kernel_size=(5, 5))
                 deviation, out_image, contour = analyzer.find_centroid(preprocessed_frame, render=not self.args.headless)
+                # print(deviation)
                 if self.args.detect_colors:
                     if self.mp_analyzer is None:
-                        verdict, color = analyzer.find_colors(frame, render=not self.args.headless, otsu=True, centroid=deviation, thresh=thresh)
+                        verdict, color = analyzer.find_colors(frame, render=not self.args.headless, otsu=True, centroid=deviation)
                     else:
                         verdict = [int.from_bytes(analyzer_shm.buf), 0]
                         color = color_placeholder
 
                 if self.args.stop_on_line:
-                    sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.6)), (int(frame.shape[0] * 0.85), int(frame.shape[1] * 0.6)))  # Completely ✨ arbitrary ✨ numbers
+                    sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), (int(frame.shape[0] * 0.85), int(frame.shape[1] * 0.45)))  # Completely ✨ arbitrary ✨ numbers
                     if sf_detect and ((time.time() - start_time) > 10):
+                        cv2.imwrite('amogus.jpg', cv2.circle(img=frame, center=(int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), radius=5, color=(0,0,255), thickness=-1))
                         stop_time = time.time()
                     if stop_time is not None and ((time.time() - stop_time) > 0.5):
                         break
@@ -103,11 +109,10 @@ class Robot:
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         if verdict_o_meter[0] == 1:
                             print("Red, new desired speed")
-                            desired_speed = int(self.args.speed*0.6)
+                            desired_speed = int(self.args.speed*0.8)
                         if verdict_o_meter[0] == 2:
                             print("Green, new desired speed")
                             desired_speed = self.args.speed
-                            
                         verdict_o_meter = [0,0,0]
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] <= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         verdict_o_meter = [0, 0, 0]
@@ -125,8 +130,8 @@ class Robot:
                     if speed > desired_speed:
                         speed = desired_speed
 
-                    Kp = 1.1
-                    Kd = 0.1
+                    Kp = 1.2
+                    Kd = 0
                     E = 1 - abs(deviation)
 
                     P = E * Kp
@@ -137,6 +142,7 @@ class Robot:
                         out_speed = [round(speed * output), round(speed)]
                     else:
                         out_speed = [round(speed), round(speed * output)]
+#                    out_speed[0] = int(out_speed[0]+0x0200)
                     if self.args.running_on_rpi and self.args.motors:
                         motors.speed = out_speed
                         if self.args.servo:

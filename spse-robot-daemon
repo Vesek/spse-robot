@@ -25,10 +25,10 @@ class namespace:
     image=None
     stop_on_line=True
     detect_colors=True
-    speed=0x6000
+    speed=0xC000
     accel=speed/2
     servo=False
-    verbose=False
+    verbose=True
     running_on_rpi=True
     fb_size=(1920, 1080)
     legacy_motors=False
