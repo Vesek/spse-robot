@@ -84,7 +84,7 @@ class Robot:
                 # print(deviation)
                 if self.args.detect_colors:
                     if self.mp_analyzer is None:
-                        verdict, color = analyzer.find_colors(frame, render=not self.args.headless, otsu=True, centroid=deviation)
+                        verdict, color = analyzer.find_colors(frame, render=not self.args.headless, otsu=True, centroid=deviation, mask=preprocessed_frame)
                     else:
                         verdict = [int.from_bytes(analyzer_shm.buf), 0]
                         color = color_placeholder
@@ -129,8 +129,8 @@ class Robot:
                     if speed > desired_speed:
                         speed = desired_speed
 
-                    Kp = 1.0
-                    Kd = 0
+                    Kp = 0.70
+                    Kd = 0.01
                     E = deviation
 
                     PD = E * Kp + ((E - last_E) / (now_time - last_time)) * Kd

@@ -18,6 +18,6 @@ class Camera:
         #self.time = time.time()
         array = self.picam2.capture_array()
         # array = array[:,80:480,:] # Hopefully won't need this
-        array = array[60:,:,:3]
+        array = array[280:,:,:3]
         # array = cv2.rotate(array, cv2.ROTATE_90_COUNTERCLOCKWISE)
         return array

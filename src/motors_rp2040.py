@@ -37,11 +37,11 @@ class Motors:
         self._speed = newSpeed
         msg = [0x10]
 
-        h1,h2 = min(self._speed[0],65535).to_bytes(2, "big")
+        h1,h2 = max(min(self._speed[0],65535), 0).to_bytes(2, "big")
         msg.append(h1)
         msg.append(h2)
 
-        h1,h2 = min(self._speed[1],65535).to_bytes(2, "big")
+        h1,h2 = max(min(self._speed[1],65535), 0).to_bytes(2, "big")
         msg.append(h1)
         msg.append(h2)
 

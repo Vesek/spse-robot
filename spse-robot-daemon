@@ -23,12 +23,12 @@ class namespace:
     show_raw=False
     show_preprocessed=False
     image=None
-    stop_on_line=True
-    detect_colors=True
+    stop_on_line=False
+    detect_colors=False
     speed=0x9000
     accel=speed/2
     servo=False
-    verbose=False
+    verbose=True
     running_on_rpi=True
     fb_size=(1920, 1080)
     legacy_motors=False
