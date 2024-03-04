@@ -96,7 +96,11 @@ class Analyzer:
                 cv2.drawContours(out_image, [contour], -1, (255, 0, 0), 3)  # Render the line
                 cy = int(moments['m01'] / moments['m00'])
                 cv2.circle(out_image, (cx, cy), 7, (0, 0, 255), -1)  # Render the centroid
-                cv2.putText(img=out_image, text=str(deviation), org=(20, 30), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255), thickness=2)  # Some debug text (also it looks cool)
+                # cv2.putText(img=out_image, text=str(cv2.contourArea(contour)), org=(20, 30), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 0, 255), thickness=2)
+                cv2.putText(img=out_image, text=str(deviation), org=(20, 70), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(255, 0, 0), thickness=2)  # Some debug text (also it looks cool)
+            #print(cv2.contourArea(contour))
+            if cv2.contourArea(contour) > 40000:
+                deviation = None
         return deviation, out_image, contour
 
     def stop_line_detect(self, contour, point1, point2):  # Same as the colors, if it's stupid and it works, it is not stupid
