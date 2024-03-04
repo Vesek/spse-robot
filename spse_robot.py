@@ -7,6 +7,33 @@ import argparse
 import signal
 import os
 from multiprocessing import shared_memory
+from flask import Flask, render_template, request
+
+Kp = 1.1
+Kd = 0.1
+
+app = Flask(__name__, template_folder=os.path.abspath("src/"))
+Ki = 0
+speed = 0
+
+
+@app.route("/")
+def control_page():
+    global speed, Kp, Ki, Kd
+
+    return render_template("control.html", speed=speed, Kp=Kp, Ki=Ki, Kd=Kd)
+
+
+@app.route("/", methods=["POST"])
+def update_values():
+    global speed, Kp, Ki, Kd
+    # Update PID values from form submission
+    speed = float(request.form["speed"])
+    Kp = float(request.form["Kp"])
+    Ki = float(request.form["Ki"])
+    Kd = float(request.form["Kd"])
+
+    return render_template("control.html", speed=speed, Kp=Kp, Ki=Ki, Kd=Kd)
 
 
 class Robot:
@@ -29,6 +56,7 @@ class Robot:
             self.max_angle = 110
 
     def main_loop(self):
+        global Kp, Kd
         if self.args.running_on_rpi and self.args.motors:  # Initialize motors only when running on a Raspberry Pi
             if self.args.legacy_motors:
                 from src.motors import Motors
