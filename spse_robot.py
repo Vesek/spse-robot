@@ -89,14 +89,6 @@ class Robot:
                         verdict = [int.from_bytes(analyzer_shm.buf), 0]
                         color = color_placeholder
 
-                if self.args.stop_on_line:
-                    sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), (int(frame.shape[0] * 0.85), int(frame.shape[1] * 0.45)))  # Completely ✨ arbitrary ✨ numbers
-                    if sf_detect and ((time.time() - start_time) > 10):
-                        cv2.imwrite('amogus.jpg', cv2.circle(img=frame, center=(int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), radius=5, color=(0,0,255), thickness=-1))
-                        stop_time = time.time()
-                    if stop_time is not None and ((time.time() - stop_time) > 0.5):
-                        break
-
                 if self.args.detect_colors:
                     if verdict[0] != 0:
                         if verdict_o_meter[0] == verdict[0]:
@@ -123,6 +115,14 @@ class Robot:
 
                 if deviation is not None:
                     now_time = time.time()
+
+                    if self.args.stop_on_line:
+                        sf_detect = analyzer.stop_line_detect(contour, (int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), (int(frame.shape[0] * 0.85), int(frame.shape[1] * 0.45)))  # Completely ✨ arbitrary ✨ numbers
+                        if sf_detect and ((time.time() - start_time) > 10):
+                            cv2.imwrite('amogus.jpg', cv2.circle(img=frame, center=(int(frame.shape[0] * 0.15), int(frame.shape[1] * 0.45)), radius=5, color=(0,0,255), thickness=-1))
+                            stop_time = time.time()
+                        if stop_time is not None and ((time.time() - stop_time) > 0.5):
+                            break
 
                     if speed < desired_speed:
                         speed += self.args.accel * (now_time - last_time)
