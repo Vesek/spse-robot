@@ -10,11 +10,13 @@ class Analyzer:
         if centroid is not None:  # Cuts off the left part of the line because there will never be a color dot there (at least in our case)
             cut = int((centroid + 1) * (frame.shape[1] / 2))
             channels = [frame[:, cut:, 0], frame[:, cut:, 1], frame[:, cut:, 2]]
+            mask = mask[:,cut:]
         else:
             channels = [frame[:, :, 0], frame[:, :, 1], frame[:, :, 2]]
         for i in range(len(channels)):
             if otsu:  # Pick which thresholding to use based on arguments
-                blur = cv2.GaussianBlur(channels[i], (3, 3), 0)  # Decided on with  C R E A T I V E  measures
+                blur = channels[i]
+                # blur = cv2.GaussianBlur(channels[i], (3, 3), 0)  # Decided on with  C R E A T I V E  measures
                 if thresh is None:  # If combined thresholding is enabled use that, otherwise use otsu
                     ret, th = cv2.threshold(blur, 0, 255, cv2.THRESH_OTSU)
                 else:
@@ -30,7 +32,7 @@ class Analyzer:
         green = np.bitwise_and(np.bitwise_and(channels[1], np.bitwise_not(channels[0])), np.bitwise_not(channels[2]))
         if mask is not None:
             kernel = np.ones((5, 5), np.uint8)
-            mask = cv2.morphologyEx(mask[:, cut:], cv2.MORPH_ERODE, kernel)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_ERODE, kernel)
             np.bitwise_and(red, mask)
             np.bitwise_and(green, mask)
         red_contours, red_hierarchy = cv2.findContours(red, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)  # This is just straight up stupid but i want to go to sleep earlier than yesterday
@@ -42,13 +44,13 @@ class Analyzer:
 
         if len(red_contours) != 0:
             red_contour = max(red_contours, key=cv2.contourArea)
-            if cv2.contourArea(red_contour) >= 40:  # Save the final verdict only if it's pretty confident
+            if cv2.contourArea(red_contour) >= 400:  # Save the final verdict only if it's pretty confident
                 if render:
                     cv2.drawContours(red, [red_contour], -1, 255, 3)
                 verdict = [1, cv2.contourArea(red_contour)]
         if len(green_contours) != 0:
             green_contour = max(green_contours, key=cv2.contourArea)
-            if cv2.contourArea(green_contour) >= 40:  # Save the final verdict only if it's pretty confident
+            if cv2.contourArea(green_contour) >= 400:  # Save the final verdict only if it's pretty confident
                 if render:
                     cv2.drawContours(green, [green_contour], -1, 255, 3)
                 verdict = [2, cv2.contourArea(green_contour)]
