@@ -24,7 +24,7 @@ class namespace:
     show_preprocessed=False
     image=None
     stop_on_line=True
-    detect_colors=True
+    detect_colors=False
     speed=0xC000
     accel=speed/2
     servo=False
