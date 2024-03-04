@@ -158,6 +158,8 @@ class Robot:
                     if self.args.verbose:
                         print("Main control loop took", int((time.time() - metrics_time) * 1000), "ms")
                         print(out_speed)
+                        if not self.args.headless:
+                            cv2.putText(img=out_image, text=str(out_speed), org=(60, 60), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(255, 0, 0), thickness=2)
 
                 if not self.args.headless:  # Display output
                     if self.args.show_preprocessed:
