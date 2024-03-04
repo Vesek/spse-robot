@@ -23,7 +23,7 @@ class namespace:
     show_raw=False
     show_preprocessed=False
     image=None
-    stop_on_line=False
+    stop_on_line=True
     detect_colors=False
     speed=0x9000
     accel=speed/2
