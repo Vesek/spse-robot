@@ -132,6 +132,7 @@ class Robot:
                     Kp = 0.6
                     Kd = 0
                     E = deviation
+
                     PD = E * Kp + ((E - last_E) / (now_time - last_time)) * Kd
                     out_speed = [round(speed * (1-PD)), round(speed * (1+PD))]
 
