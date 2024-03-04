@@ -44,13 +44,13 @@ class Analyzer:
 
         if len(red_contours) != 0:
             red_contour = max(red_contours, key=cv2.contourArea)
-            if cv2.contourArea(red_contour) >= 400:  # Save the final verdict only if it's pretty confident
+            if cv2.contourArea(red_contour) >= 1500:  # Save the final verdict only if it's pretty confident
                 if render:
                     cv2.drawContours(red, [red_contour], -1, 255, 3)
                 verdict = [1, cv2.contourArea(red_contour)]
         if len(green_contours) != 0:
             green_contour = max(green_contours, key=cv2.contourArea)
-            if cv2.contourArea(green_contour) >= 400:  # Save the final verdict only if it's pretty confident
+            if cv2.contourArea(green_contour) >= 1500:  # Save the final verdict only if it's pretty confident
                 if render:
                     cv2.drawContours(green, [green_contour], -1, 255, 3)
                 verdict = [2, cv2.contourArea(green_contour)]
