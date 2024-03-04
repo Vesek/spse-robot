@@ -38,8 +38,7 @@ class Robot:
                 from src.motors_rp2040 import Motors
                 motors = Motors()
                 motors.enable()
-
-        motors.speed = [0,0]
+            motors.speed = [0,0]
 
         frame = self.camera.capture() # So we can get the shape of the array
 
