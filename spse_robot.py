@@ -129,12 +129,12 @@ class Robot:
                     if speed > desired_speed:
                         speed = desired_speed
 
-                    Kp = 0.6
+                    Kp = 1.0
                     Kd = 0
                     E = deviation
 
                     PD = E * Kp + ((E - last_E) / (now_time - last_time)) * Kd
-                    out_speed = [round(speed * (1-PD)), round(speed * (1+PD))]
+                    out_speed = [round(speed * (1+PD)), round(speed * (1-PD))]
 
                     if self.args.running_on_rpi and self.args.motors:
                         motors.speed = out_speed
