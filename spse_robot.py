@@ -8,7 +8,6 @@ import signal
 import os
 from multiprocessing import shared_memory
 
-
 class Robot:
     def __init__(self, camera, args, mp_analyzer=None):
         self.camera = camera
@@ -27,18 +26,26 @@ class Robot:
         if self.args.servo:
             self.radial_speed_servo = 90  # In degrees per second
             self.max_angle = 110
+        
+        if self.args.running_on_rpi and self.args.use_leds:
+            import RPi.GPIO as GPIO
+            GPIO.setmode(GPIO.BCM)
 
     def main_loop(self):
-        if self.args.running_on_rpi and self.args.motors:  # Initialize motors only when running on a Raspberry Pi
-            if self.args.legacy_motors:
-                from src.motors import Motors
-                motors = Motors()
-                motors.enable()
-            else:
-                from src.motors_rp2040 import Motors
-                motors = Motors()
-                motors.enable()
-            motors.speed = [0,0]
+        if self.args.running_on_rpi:  # Initialize motors only when running on a Raspberry Pi
+            if self.args.motors:
+                if self.args.legacy_motors:
+                    from src.motors import Motors
+                    motors = Motors()
+                    motors.enable()
+                else:
+                    from src.motors_rp2040 import Motors
+                    motors = Motors()
+                    motors.enable()
+                motors.speed = [0,0]
+            if self.args.use_leds:
+                GPIO.setup(22, GPIO.OUT)
+                GPIO.setup(27, GPIO.OUT)
 
         frame = self.camera.capture() # So we can get the shape of the array
 
@@ -101,9 +108,15 @@ class Robot:
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] >= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
                         if verdict_o_meter[0] == 1:
                             print("Red, new desired speed")
+                            if self.args.running_on_rpi and self.args.use_leds:
+                                GPIO.output(22, 1)
+                                GPIO.output(27, 1)
                             desired_speed = int(self.args.speed*0.8)
                         if verdict_o_meter[0] == 2:
                             print("Green, new desired speed")
+                            if self.args.running_on_rpi and self.args.use_leds:
+                                GPIO.output(22, 0)
+                                GPIO.output(27, 0)
                             desired_speed = self.args.speed
                         verdict_o_meter = [0,0,0]
                     if verdict_o_meter[0] != 0 and verdict_o_meter[1] <= min_color_frames and verdict_o_meter[2] >= max_noncolor_frames:
@@ -176,6 +189,8 @@ class Robot:
             print("\nStopped the main loop due to a keyboard interrupt\n")
 
         print("\nStopped the main loop\n")
+        if self.args.running_on_rpi and self.args.use_leds:
+            GPIO.cleanup() 
         if not self.args.headless and not self.args.use_fb:
             cv2.destroyAllWindows()
 
@@ -198,6 +213,7 @@ if __name__ == "__main__":
     parser.add_argument('--servo', help="Enables the serveo", action='store_true')
     parser.add_argument('-v','--verbose', help="Prints aditional info", action='store_true')
     parser.add_argument('-lm','--legacy-motors', help="When enabled the old I2C motor driver will be used", action='store_true', dest="legacy_motors")
+    parser.add_argument('--led', help="Lights up LEDs at pins 27 and 22 when red is detected", action='store_true', dest="use_leds")
 
     args = parser.parse_args() # headless, use_fb, motors, show_raw, show_preprocessed, image, stop_on_line, detect_colors, speed, acceleration, servo, verbose, legacy_motors
     
