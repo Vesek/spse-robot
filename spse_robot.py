@@ -24,8 +24,9 @@ class Robot:
             self.args.use_fb = False
 
         if self.args.servo:
-            self.radial_speed_servo = 90  # In degrees per second
-            self.max_angle = 110
+            self.radial_speed_servo = 30  # In degrees per second
+            self.max_angle = 70
+            self.min_angle = 25
         
         if self.args.running_on_rpi and self.args.use_leds:
             import RPi.GPIO as GPIO
@@ -157,8 +158,8 @@ class Robot:
                             if motors.angle > self.max_angle:
                                 motors.angle = self.max_angle
                                 self.radial_speed_servo *= -1
-                            elif motors.angle <= 0:
-                                motors.angle = 0
+                            elif motors.angle <= self.min_angle:
+                                motors.angle = self.min_angle
                                 self.radial_speed_servo *= -1
                     last_time = now_time
                     last_E = E
