@@ -1,33 +1,39 @@
 # spse-robot
 Software for a line following robot that me and my friend Honza Ocelík built for our school (VOŠ a SPŠE Plzeň) in the school year 2023/24.
 
-## Setup
-The software for written for running on a Raspberry Pi but can also run on a PC with a webcam.
+The software for written for running on a Raspberry Pi (tested on RPi 4 and Zero 2 W) but can also run on a PC with a webcam.
 
-It was written with Python 3.11 in mind so if it stops working in future versions create an issue.
+It was written with Python 3.11 in mind, so if it stops working in future versions, create an issue.
 
-I recommend using a Python venv for the requirements (even tho there aren't many):
+### Setup on PC
+
+I recommend using a Python venv for testing on your PC:
 ```
-python -m venv --system-site-packages env
+python -m venv env
 pip install -r requirements.txt
-sudo apt install python3-picamera2
 ```
-It needs `--system-site-packages` because picamera2 cannot be installed from pip (at the time of writing it crashes).
 
-For the framebuffer output to work correctly it need this added to `/boot/cmdline.txt` on your RPi:
+### Setup on RPi
+
+You can use a venv but in the case of the Pi I don't think it's necessary.
 ```
-video=HDMI-A-1:1920x1080M-32@60
+sudo apt install python3-picamera2 python3-rpi.gpio python3-systemd python3-opencv python3-numpy python3-spidev
 ```
-It sets the color depth on the connector HDMI0 to 32 bits so the frames can be rendered in full color. My attempts to make it work in 16 bit were unsuccesful because of a lot of artifacts.
+
+For the framebuffer output to work correctly, it needs this added to `/boot/cmdline.txt` of your RPi:
+```
+video=HDMI-A-1:-32
+```
+This argument sets the color depth to 32 bits so the frames can be rendered in full color. My attempts to make it work in 16 bit were unsuccesful.
+
+For the use with our PCB you will need to enable SPI using `raspi-config`.
 
 ## Usage
-You can check the script's built in help using
+For usage on you piece of hardware, you should review the code first, it is very much coded for our robot first and there are a lot of hardcoded values. Even the software part of things isn't much better, the systemd services have a hardcoded path to /home/pi/spse-robot (might change that).
+
+You can check the script's built-in help using
 ```
-python main.py -h
+python spse_robot.py --help
 ```
 
 If you want a clean output to a framebuffer use the `blank_fb.sh` script.
-
-## TODO
-
-- [ ] Make a C++ version (maaaaaybe)

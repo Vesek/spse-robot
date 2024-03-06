@@ -1,0 +1,114 @@
+#!/bin/python3
+import RPi.GPIO as GPIO
+import systemd.daemon
+import os
+from spse_robot import Robot
+from src.picam import Camera
+from src.threadcamera import ThreadCamera
+from multiprocessing import Process
+from multiprocessing import shared_memory
+import signal
+import sys
+import numpy as np
+from src.threadanalyzer import ThreadAnalyzer
+
+os.environ["LIBCAMERA_LOG_LEVELS"] = "3"
+
+BUTTON_PIN = 17
+
+class namespace:
+    headless=True
+    use_fb=True
+    motors=True
+    show_raw=False
+    show_preprocessed=False
+    image=None
+    stop_on_line=True
+    detect_colors=True
+    speed=0xC000
+    accel=speed/2
+    servo=False
+    verbose=True
+    running_on_rpi=True
+    fb_size=(1920, 1080)
+    legacy_motors=False
+
+real_camera = Camera()
+frame = real_camera.capture()
+main_shm = shared_memory.SharedMemory(create=True, size=frame.nbytes)
+buffer = np.ndarray(frame.shape, dtype=frame.dtype, buffer=main_shm.buf)
+
+camera = ThreadCamera(main_shm.name, frame.shape, frame.dtype)
+# robot = Robot(camera, namespace)
+
+#analyzer_shm = shared_memory.SharedMemory(create=True, size=1)
+#threadanalyzer = ThreadAnalyzer(main_shm.name, frame.shape, frame.dtype, analyzer_shm.name)
+robot = Robot(camera, namespace)
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BUTTON_PIN, GPIO.IN, GPIO.PUD_UP)
+
+process = None
+
+#analyzer_process = None
+
+pressed = False
+
+
+def signalHandler(signal, frame):
+    try:
+        print("Stopping main loop")
+        process.terminate()
+        process.join()
+        #print("Stopping analyzer loop")
+        #analyzer_process.terminate()
+        #analyzer_process.join()
+    except AttributeError:
+        pass
+    print("Stopping spse-robot-audio")
+    os.system("systemctl --user stop spse-robot-audio")
+    main_shm.close()
+    main_shm.unlink()
+    #analyzer_shm.close()
+    #analyzer_shm.unlink()
+    sys.exit(0)
+
+
+def onButton(channel):
+    global pressed
+    print("Button pressed!")
+    pressed = True
+
+
+signal.signal(signal.SIGINT, signalHandler)
+GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=onButton, bouncetime=1000)
+print("Initialzed!")
+systemd.daemon.notify('READY=1')
+while True:
+    frame = real_camera.capture()
+    buffer[:] = frame[:]
+    if pressed:
+        pressed = False
+        if process is None and os.system("systemctl --user is-active --quiet spse-robot-audio") != 0:
+            process = Process(target=robot.main_loop)
+            print("Starting main loop")
+            process.start()
+            #analyzer_process = Process(target=threadanalyzer.main_loop)
+            #print("Starting analyzer")
+            #analyzer_process.start()
+            print("Starting spse-robot-audio")
+            os.system("systemctl --user start spse-robot-audio")
+        else:
+            try:
+                print("Stopping main loop")
+                process.terminate()
+                process.join()
+                #print("Stopping analyzer loop")
+                #analyzer_process.terminate()
+                #analyzer_process.join()
+            except AttributeError:
+                pass
+            process = None
+            #analyzer_process = None
+            print("Stopping spse-robot-audio")
+            os.system("systemctl --user stop spse-robot-audio")
