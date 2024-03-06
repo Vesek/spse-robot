@@ -25,13 +25,14 @@ class namespace:
     image=None
     stop_on_line=True
     detect_colors=True
-    speed=0xC000
+    speed=0x9000
     accel=speed/2
     servo=False
-    verbose=True
+    verbose=False
     running_on_rpi=True
     fb_size=(1920, 1080)
     legacy_motors=False
+    use_leds=True
 
 real_camera = Camera()
 frame = real_camera.capture()

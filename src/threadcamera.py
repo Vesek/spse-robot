@@ -11,4 +11,4 @@ class ThreadCamera:  # WHY DOES THIS HAVE TO EXIST (i want to unalive myself)
         self.shm.close()
 
     def capture(self):
-        return self.buffer
+        return self.buffer.copy()
